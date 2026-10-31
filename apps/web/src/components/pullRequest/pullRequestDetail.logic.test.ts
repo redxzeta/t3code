@@ -55,6 +55,7 @@ import {
   buildPullRequestTimeline,
   writePullRequestDetailSnapshot,
   readableFailure,
+  pullRequestMergeQueueLabel,
 } from "./pullRequestDetail.logic";
 import type { ReviewCommentContext } from "~/reviewCommentContext";
 
@@ -1517,5 +1518,26 @@ describe("readableFailure", () => {
     expect(readableFailure(new Error("Branch is protected."), "Try again.")).toBe(
       "Branch is protected.",
     );
+  });
+});
+
+describe("merge queue presentation", () => {
+  it.each([
+    ["AWAITING_CHECKS", "Merge queue: awaiting checks"],
+    ["UNMERGEABLE", "Merge queue: unable to merge"],
+    ["QUEUED", "Merge queue: queued"],
+    ["LOCKED", "Merge queue: locked"],
+    ["MERGEABLE", "Merge queue: ready to merge"],
+    [null, "In merge queue: status unknown"],
+    ["FUTURE_STATE", "In merge queue: status unknown"],
+  ])("labels queue state %s without asserting a merge", (state, label) => {
+    expect(pullRequestMergeQueueLabel({ state: "open", mergeQueue: { state } })).toBe(label);
+  });
+  it("preserves legacy and non-queued details and clears queue after merge", () => {
+    expect(pullRequestMergeQueueLabel({ state: "open" })).toBeNull();
+    expect(pullRequestMergeQueueLabel({ state: "open", mergeQueue: null })).toBeNull();
+    expect(
+      pullRequestMergeQueueLabel({ state: "merged", mergeQueue: { state: "MERGEABLE" } }),
+    ).toBeNull();
   });
 });

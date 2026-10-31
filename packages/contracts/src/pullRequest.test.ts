@@ -128,6 +128,15 @@ describe("PullRequestCapabilities", () => {
       requestReviewers: true,
     });
     expect(decoded.title).toBe(detail.title);
+    expect(decoded.mergeQueue).toBeUndefined();
+    for (const mergeQueue of [
+      null,
+      { state: "AWAITING_CHECKS" },
+      { state: "UNMERGEABLE" },
+      { state: null },
+    ]) {
+      expect(decodeDetail({ ...detail, mergeQueue }).mergeQueue).toEqual(mergeQueue);
+    }
   });
 });
 

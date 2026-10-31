@@ -1403,3 +1403,23 @@ export function resolveDisplayedPullRequestDetail(input: {
     ? input.cached
     : null;
 }
+
+export function pullRequestMergeQueueLabel(
+  detail: Pick<PullRequestDetail, "state" | "mergeQueue">,
+): string | null {
+  if (detail.state !== "open" || detail.mergeQueue == null) return null;
+  switch (detail.mergeQueue.state) {
+    case "AWAITING_CHECKS":
+      return "Merge queue: awaiting checks";
+    case "UNMERGEABLE":
+      return "Merge queue: unable to merge";
+    case "QUEUED":
+      return "Merge queue: queued";
+    case "LOCKED":
+      return "Merge queue: locked";
+    case "MERGEABLE":
+      return "Merge queue: ready to merge";
+    default:
+      return "In merge queue: status unknown";
+  }
+}

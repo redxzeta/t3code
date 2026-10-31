@@ -130,6 +130,7 @@ function ChecksBody({
 export function PullRequestChecksPopover({
   checksState,
   checks,
+  queueLabel,
   stale = false,
   environmentId,
   reference,
@@ -139,6 +140,7 @@ export function PullRequestChecksPopover({
   render,
 }: {
   checksState: PullRequestChecksState;
+  queueLabel?: string | null;
   checks?: ReadonlyArray<PullRequestCheck>;
   stale?: boolean;
   environmentId?: EnvironmentId;
@@ -162,8 +164,8 @@ export function PullRequestChecksPopover({
         nativeButton={variant === "count"}
         aria-label={
           variant === "count"
-            ? `Open checks: ${summary ?? presentation.label}`
-            : `Checks: ${presentation.label}`
+            ? `Open PR-head checks: ${summary ?? presentation.label}`
+            : `PR-head checks: ${presentation.label}`
         }
         render={
           variant === "count" ? (
@@ -192,7 +194,10 @@ export function PullRequestChecksPopover({
         ) : null}
       </PopoverTrigger>
       <PopoverPopup align="start" width="md" side="bottom">
-        <p className="mb-2 font-medium text-sm">{presentation.label}</p>
+        <p className="mb-2 font-medium text-sm">PR-head checks: {presentation.label}</p>
+        {queueLabel ? (
+          <p className="mb-2 text-sm">{queueLabel}. Merge-group checks are not listed here.</p>
+        ) : null}
         {summary === null ? null : <p className="mb-2 text-muted-foreground text-xs">{summary}</p>}
         {stale ? (
           <p className="text-muted-foreground text-xs">

@@ -1795,6 +1795,9 @@ export const make = Effect.gen(function* () {
               ? {}
               : { baseComparison: changeRequest.baseComparison }),
             ...(changeRequest.behindBy === undefined ? {} : { behindBy: changeRequest.behindBy }),
+            ...(changeRequest.mergeQueue === undefined
+              ? {}
+              : { mergeQueue: changeRequest.mergeQueue }),
             ...(changeRequest.autoMergeEnabled === undefined
               ? {}
               : { autoMergeEnabled: changeRequest.autoMergeEnabled }),

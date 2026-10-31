@@ -87,6 +87,18 @@ export const FileViewedState = Schema.Literals(["DISMISSED", "UNVIEWED", "VIEWED
 export type FileViewedState = typeof FileViewedState.Type
 
 /**
+ * The possible states for a merge queue entry.
+ *
+ * - `AWAITING_CHECKS`: The entry is currently waiting for checks to pass.
+ * - `LOCKED`: The entry is currently locked.
+ * - `MERGEABLE`: The entry is currently mergeable.
+ * - `QUEUED`: The entry is currently queued.
+ * - `UNMERGEABLE`: The entry is currently unmergeable.
+ */
+export const MergeQueueEntryState = Schema.Literals(["AWAITING_CHECKS", "LOCKED", "MERGEABLE", "QUEUED", "UNMERGEABLE"])
+export type MergeQueueEntryState = typeof MergeQueueEntryState.Type
+
+/**
  * Detailed status information about a pull request merge.
  *
  * - `BEHIND`: The head ref is out of date.

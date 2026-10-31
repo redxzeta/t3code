@@ -587,6 +587,9 @@ export const PullRequestDetail = Schema.Struct({
   viewer: Schema.optional(TrimmedNonEmptyString),
   baseComparison: Schema.optional(PullRequestBaseComparison),
   behindBy: Schema.optional(NonNegativeInt),
+  mergeQueue: Schema.optional(
+    Schema.NullOr(Schema.Struct({ state: Schema.NullOr(Schema.String) })),
+  ),
   /** Absent means the host does not report auto-merge state, not that it is off. */
   autoMergeEnabled: Schema.optional(Schema.Boolean),
   autoMergeMethod: Schema.optional(PullRequestMergeMethod),

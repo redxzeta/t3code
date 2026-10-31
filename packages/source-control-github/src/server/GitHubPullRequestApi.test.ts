@@ -77,6 +77,8 @@ const coreResponse = (pullRequest: Readonly<Record<string, unknown>> = {}) => ({
         headRepository: null,
         headRef: null,
         author: null,
+        isInMergeQueue: false,
+        mergeQueueEntry: null,
         autoMergeRequest: null,
         headRefName: "feature",
         baseRefName: "main",

@@ -367,6 +367,8 @@ describe("pull request detail decoding", () => {
             headRepository: null,
             headRef: null,
             author: null,
+            isInMergeQueue: false,
+            mergeQueueEntry: null,
             autoMergeRequest: null,
             viewerCanUpdate: true,
             viewerDidAuthor: false,
@@ -499,6 +501,32 @@ describe("pull request detail decoding", () => {
       ),
       commits: page.commits ?? [],
     }));
+
+  it.each(["AWAITING_CHECKS", "UNMERGEABLE", "QUEUED", "LOCKED", "MERGEABLE"])(
+    "keeps passing head checks separate from queue state %s",
+    (state) => {
+      const detail = detailOf([check({ name: "CI", conclusion: "SUCCESS" })], {
+        isInMergeQueue: true,
+        mergeQueueEntry: { state },
+      });
+      expect(detail.checksState).toBe("passing");
+      expect(detail.mergeQueue).toEqual({ state });
+    },
+  );
+
+  it("reports absent queues and ignores stale queue entries after merge", () => {
+    expect(detailOf([], { isInMergeQueue: false, mergeQueueEntry: null }).mergeQueue).toBeNull();
+    expect(
+      detailOf([], {
+        state: "MERGED",
+        isInMergeQueue: true,
+        mergeQueueEntry: { state: "MERGEABLE" },
+      }).mergeQueue,
+    ).toBeNull();
+    expect(detailOf([], { isInMergeQueue: true, mergeQueueEntry: null }).mergeQueue).toEqual({
+      state: null,
+    });
+  });
 
   it("keeps a workflow waiting for approval out of the passing state", () => {
     const detail = detailOf([
