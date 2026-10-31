@@ -1,7 +1,11 @@
-import type { ModelSelection, ProviderDriverKind, ProviderInstanceId } from "@t3tools/contracts";
+import type {
+  ClaudeSettings,
+  ModelSelection,
+  ProviderDriverKind,
+  ProviderInstanceId,
+} from "@t3tools/contracts";
 import {
   CLAUDE_RESUME_COMPACTION_NEVER_ANSWER,
-  COMPACTION_SUGGESTION_MIN_TOKENS,
   isClaudeResumeCompactionQuestion,
 } from "@t3tools/shared/claudeCompaction";
 import {
@@ -67,10 +71,12 @@ export function shouldOfferResumeCompaction(input: {
   readonly updatedAt: string | null | undefined;
   readonly promptCacheTtlMs?: number | undefined;
   readonly now: string;
+  readonly threshold?: ClaudeSettings["resumeCompactionThreshold"] | undefined;
 }): boolean {
   if (
     input.provider !== "claudeAgent" ||
-    (input.usedTokens ?? 0) < COMPACTION_SUGGESTION_MIN_TOKENS
+    input.threshold === "never" ||
+    (input.usedTokens ?? 0) < Number(input.threshold ?? "100000")
   ) {
     return false;
   }

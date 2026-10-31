@@ -484,3 +484,19 @@ describe("server model preferences", () => {
     expect(decodeServerSettingsPatch(input)).toEqual(input);
   });
 });
+
+describe("Claude resume compaction settings", () => {
+  it("defaults old configs and round-trips thresholds independently of auto-compaction", () => {
+    expect(decodeClaudeSettings({}).resumeCompactionThreshold).toBe("100000");
+    for (const threshold of ["100000", "300000", "500000", "never"]) {
+      const decoded = decodeClaudeSettings({
+        resumeCompactionThreshold: threshold,
+        autoCompactWindow: "400000",
+      });
+      expect(decoded.resumeCompactionThreshold).toBe(threshold);
+      expect(decoded.autoCompactWindow).toBe("400000");
+      expect(decodeClaudeSettings(JSON.parse(JSON.stringify(decoded)))).toEqual(decoded);
+    }
+    expect(() => decodeClaudeSettings({ resumeCompactionThreshold: "bogus" })).toThrow();
+  });
+});

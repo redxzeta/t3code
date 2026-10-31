@@ -53,6 +53,8 @@ import { useWorktreeSetup } from "./chat/useWorktreeSetup";
 import { useChatShortcuts } from "./chat/useChatShortcuts";
 import { ChatBannerLane } from "./chat/ChatBannerLane";
 import * as Schema from "effect/Schema";
+import * as Option from "effect/Option";
+import { ClaudeSettings } from "@t3tools/contracts";
 import {
   AuthOrchestrationOperateScope,
   AuthSourceControlWriteScope,
@@ -411,6 +413,8 @@ type ChatViewProps =
     };
 
 const DismissedFallbackWindowSchema = Schema.NullOr(Schema.String);
+
+const decodeClaudeSettings = Schema.decodeUnknownOption(ClaudeSettings);
 
 export default function ChatView(props: ChatViewProps) {
   const {
@@ -2500,6 +2504,11 @@ export default function ChatView(props: ChatViewProps) {
     !hasHeldQueuedRuns &&
     multipleModelSelections === null &&
     shouldOfferResumeCompaction({
+      threshold: decodeClaudeSettings(
+        settings.providerInstances[
+          activeProviderInstanceId ?? ProviderInstanceId.make("claudeAgent")
+        ]?.config ?? {},
+      ).pipe(Option.getOrUndefined)?.resumeCompactionThreshold,
       provider: selectedProvider,
       usedTokens: activeContextWindow.usedTokens,
       updatedAt: activeContextWindow.updatedAt,

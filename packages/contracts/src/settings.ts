@@ -705,6 +705,13 @@ const InstanceIdleCompaction = Schema.Literals(
   INSTANCE_IDLE_COMPACTION_MODES.map((mode) => mode.value),
 );
 
+const CLAUDE_RESUME_COMPACTION_THRESHOLDS = [
+  { value: "100000", label: "100,000 tokens" },
+  { value: "300000", label: "300,000 tokens" },
+  { value: "500000", label: "500,000 tokens" },
+  { value: "never", label: "Never" },
+] as const;
+
 export const ClaudeSettings = makeProviderSettingsSchema(
   {
     enabled: Schema.Boolean.pipe(
@@ -756,12 +763,27 @@ export const ClaudeSettings = makeProviderSettingsSchema(
         },
       }),
     ),
+    resumeCompactionThreshold: Schema.Literals(
+      CLAUDE_RESUME_COMPACTION_THRESHOLDS.map((option) => option.value),
+    ).pipe(
+      Schema.withDecodingDefault(Effect.succeed("100000" as const)),
+      Schema.annotateKey({
+        title: "Suggest compaction on resume after",
+        description:
+          "Show the Compact suggestion after the prompt cache expires. Does not change auto-compaction or compaction before cache expiry.",
+        providerSettingsForm: {
+          control: "select",
+          options: CLAUDE_RESUME_COMPACTION_THRESHOLDS,
+          clearWhenEmpty: "omit",
+        },
+      }),
+    ),
     idleCompaction: InstanceIdleCompaction.pipe(
       Schema.withDecodingDefault(Effect.succeed("default" as const)),
       Schema.annotateKey({
         title: "Compact idle threads",
         description:
-          "When to compact an idle thread over 200,000 tokens: after you return, just before its prompt cache expires, or never. Overrides the default in Providers > Advanced.",
+          "When to compact an idle thread: after you return, just before its prompt cache expires (over 200,000 tokens), or never. Resume suggestions use the threshold above. Overrides the default in Providers > Advanced.",
         providerSettingsForm: {
           control: "select",
           options: INSTANCE_IDLE_COMPACTION_MODES,
@@ -771,7 +793,14 @@ export const ClaudeSettings = makeProviderSettingsSchema(
     ),
   },
   {
-    order: ["binaryPath", "homePath", "autoCompactWindow", "idleCompaction", "launchArgs"],
+    order: [
+      "binaryPath",
+      "homePath",
+      "autoCompactWindow",
+      "resumeCompactionThreshold",
+      "idleCompaction",
+      "launchArgs",
+    ],
   },
 );
 export type ClaudeSettings = typeof ClaudeSettings.Type;

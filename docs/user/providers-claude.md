@@ -57,8 +57,13 @@ history for that message. The cache lasts about an hour on a Claude
 subscription and 5 minutes with an API key, Bedrock, or Vertex. See [commands and skills](./composer.md#commands-and-skills) for using
 composer commands.
 
-**Compact idle threads** in **Settings > Providers > Advanced** controls this for threads
-over 200,000 tokens. Each Claude provider's settings can override it:
+**Suggest compaction on resume after** in the Claude provider settings controls
+when the stale-thread chip appears: 100,000 tokens (default), 300,000, 500,000,
+or **Never**. The prompt cache must also have expired. This setting does not
+change **Auto-compact after** or compaction before cache expiry.
+
+**Compact idle threads** in **Settings > Providers > Advanced** controls idle
+compaction. Compaction before cache expiry applies to threads over 200,000 tokens. Each Claude provider's settings can override it:
 
 - **When you return** shows the **Compact** chip described above. This is the default.
 - **Before the cache expires (beta)** compacts an idle thread shortly before its

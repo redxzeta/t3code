@@ -6,6 +6,7 @@ import {
   hasDismissedResumeCompaction,
   resolveContextWindowModelDisplayName,
   shouldReserveContextWindowMeter,
+  shouldOfferResumeCompaction,
 } from "./ContextWindowMeter.logic";
 
 function claudeProvider(input: {
@@ -155,5 +156,38 @@ describe("shouldReserveContextWindowMeter", () => {
         providerReportsContextWindow: null,
       }),
     ).toBe(true);
+  });
+});
+
+describe("resume compaction threshold", () => {
+  it.each([
+    [undefined, 99_999, false],
+    [undefined, 100_000, true],
+    ["300000", 120_000, false],
+    ["300000", 299_999, false],
+    ["300000", 300_000, true],
+    ["300000", 320_000, true],
+    ["500000", 499_999, false],
+    ["500000", 500_000, true],
+    ["never", 1_000_000, false],
+  ] as const)("uses threshold %s at %d tokens", (threshold, usedTokens, expected) => {
+    const input = {
+      provider: "claudeAgent",
+      usedTokens,
+      updatedAt: "2026-10-19T12:00:00.000Z",
+      now: "2026-10-19T13:11:00.000Z",
+      threshold,
+    };
+    expect(shouldOfferResumeCompaction(input)).toBe(expected);
+    expect(shouldOfferResumeCompaction({ ...input, now: "2026-10-19T12:01:00.000Z" })).toBe(false);
+    expect(shouldOfferResumeCompaction({ ...input, provider: "codex" })).toBe(false);
+    expect(shouldOfferResumeCompaction({ ...input, updatedAt: "invalid" })).toBe(false);
+    expect(
+      shouldOfferResumeCompaction({
+        ...input,
+        now: "2026-10-19T12:05:00.000Z",
+        promptCacheTtlMs: 300_000,
+      }),
+    ).toBe(expected);
   });
 });
