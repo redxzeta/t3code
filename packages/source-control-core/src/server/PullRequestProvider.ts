@@ -200,6 +200,7 @@ export interface ProviderChangeRequestDetail extends ProviderChangeRequest {
   readonly viewerPermissions: PullRequestViewerPermissions;
   readonly baseComparison?: PullRequestBaseComparison;
   readonly behindBy?: number;
+  readonly mergeQueue?: { readonly state: string | null } | null;
   readonly autoMergeEnabled?: boolean;
   readonly autoMergeMethod?: PullRequestMergeMethod;
   readonly workflowApprovalsRequired?: number;

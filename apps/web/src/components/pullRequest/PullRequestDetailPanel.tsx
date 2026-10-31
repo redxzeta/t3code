@@ -141,6 +141,7 @@ import {
   type PullRequestFinding,
   shouldRefreshPullRequestActivity,
   stripPullRequestHandoffReferences,
+  pullRequestMergeQueueLabel,
 } from "./pullRequestDetail.logic";
 import { resolvePickableEnvironments } from "./pullRequestProjectAssignment.logic";
 import { PullRequestChecksPopover } from "./PullRequestChecksPopover";
@@ -1135,6 +1136,7 @@ export function PullRequestDetailPanel({
       ? "pending"
       : latestChecksState;
   const checksStale = checksState !== detailChecksState;
+  const queueLabel = detail ? pullRequestMergeQueueLabel(detail) : null;
   const primaryAction = detail
     ? resolvePullRequestPrimaryControl({
         state: detail.state,
@@ -1585,31 +1587,39 @@ export function PullRequestDetailPanel({
             }}
           >
             {tab === "summary" ? (
-              showsApproveWorkflows ? (
-                <PullRequestApproveWorkflowsButton
-                  pullRequestKey={pullRequestKey}
-                  pendingAction={pendingAction}
-                  perform={perform}
-                />
-              ) : (
-                <PullRequestChecksStatusLine
-                  className="text-muted-foreground"
-                  aria-label={checksSummary ? `Checks: ${checksSummary}` : "Checks"}
-                  icon={
-                    checksState !== null ? (
-                      <PullRequestChecksPopover
-                        checks={detail.checks}
-                        stale={checksStale}
-                        checksState={checksState}
-                        threadRef={threadRef}
-                      />
-                    ) : (
-                      <CircleDotIcon aria-hidden className="size-3.5" />
-                    )
-                  }
-                  label={checksSummary}
-                />
-              )
+              <>
+                {showsApproveWorkflows ? (
+                  <PullRequestApproveWorkflowsButton
+                    pullRequestKey={pullRequestKey}
+                    pendingAction={pendingAction}
+                    perform={perform}
+                  />
+                ) : (
+                  <PullRequestChecksStatusLine
+                    className="text-muted-foreground"
+                    aria-label={
+                      checksSummary ? `PR-head checks: ${checksSummary}` : "PR-head checks"
+                    }
+                    icon={
+                      checksState !== null ? (
+                        <PullRequestChecksPopover
+                          queueLabel={queueLabel}
+                          checks={detail.checks}
+                          stale={checksStale}
+                          checksState={checksState}
+                          threadRef={threadRef}
+                        />
+                      ) : (
+                        <CircleDotIcon aria-hidden className="size-3.5" />
+                      )
+                    }
+                    label={checksSummary ? `PR-head checks: ${checksSummary}` : null}
+                  />
+                )}
+                {queueLabel ? (
+                  <span className="shrink-0 text-xs text-muted-foreground">{queueLabel}</span>
+                ) : null}
+              </>
             ) : tab === "timeline" ? (
               <div className="ml-auto flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
                 <PullRequestMetaLine

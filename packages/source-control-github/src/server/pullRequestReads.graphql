@@ -108,6 +108,10 @@ query PullRequestCore(
           name
         }
       }
+      isInMergeQueue
+      mergeQueueEntry {
+        state
+      }
       autoMergeRequest {
         mergeMethod
       }

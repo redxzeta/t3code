@@ -354,6 +354,7 @@ export interface GitHubPullRequestDetail extends GitHubPullRequestListItem {
   readonly mergedAt: string | null;
   readonly closedAt: string | null;
   readonly checks: ReadonlyArray<PullRequestCheck>;
+  readonly mergeQueue?: { readonly state: string | null } | null;
   readonly autoMergeEnabled?: boolean;
   readonly autoMergeMethod?: PullRequestMergeMethod;
 }
@@ -1024,6 +1025,10 @@ export function toPullRequestCore(result: PullRequestCore.Result): GitHubPullReq
       labels: nodesOf(pr.labels),
       statusCheckRollup: toCheckContexts(nodesOf(contexts)),
     }),
+    mergeQueue:
+      pr.state === "OPEN" && pr.isInMergeQueue
+        ? { state: pr.mergeQueueEntry?.state ?? null }
+        : null,
     headRepositoryNameWithOwner: trimmed(pr.headRepository?.nameWithOwner),
     maintainerCanModify: pr.maintainerCanModify,
     canEditMaintainerEdits:
