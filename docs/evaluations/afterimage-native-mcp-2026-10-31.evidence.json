@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "source_commit": "15fe2832727893cbdd2214383f9f971474849695",
+  "afterimage_commit": "e59380d3c7cff5f6e7a28c85b0164ec6451a5c62",
+  "design": {
+    "frozen_at": "2026-10-31T21:52:24.857576+00:00",
+    "commit": "15fe2832727893cbdd2214383f9f971474849695",
+    "tasks": [
+      {
+        "id": "T1",
+        "prompt": "Trace an actual app turn from client startThreadTurn through server command persistence to provider execution. Name the concrete command/event/outbox boundaries and cite source lines. Explain why graph edges alone cannot prove dispatch ordering. Do not run a provider turn.",
+        "gold": [
+          "startThreadTurn builds thread.turn.start and dispatches via environment API",
+          "Orchestrator decides events and provider-turn.start outbox effect",
+          "event sink commits before effect execution",
+          "EffectWorker executor routes provider-turn.start through providerTurnStart.start to provider execution",
+          "source citations and explicit limits of static edges"
+        ]
+      },
+      {
+        "id": "T2",
+        "prompt": "Inspect Effect.fn readTask and Effect.fnUntraced runOnce ownership in the MCP service and effect worker. Identify real direct callers, what runOnce does with no claimed effect, and a runtime member call that must not be presented as a proven cross-file edge. Cite exact source; distinguish absent graph edges from absent calls.",
+        "gold": [
+          "readTask owned by OrchestratorMcpService.ts named Effect.fn",
+          "awaitTask calls readTask on timeout; taskStatus exposes readTask",
+          "runOnce owned by EffectWorker.ts fnUntraced, drain invokes it",
+          "no claimed effect returns false; runRecoveryOnce invokes true",
+          "outbox.claimNext or Effect.exit is not a proven lexical cross-file target"
+        ]
+      },
+      {
+        "id": "T3",
+        "prompt": "Assess blast radius of changing effect-worker settlement after executor success: trace claim, cancellation and success/lease-loss paths, identify relevant existing tests, and explain whether retrying a process-bound effect after settlement failure is safe. Cite source and uncertainties; propose no edits.",
+        "gold": [
+          "runOnce claims and arms cancellation before durable recheck",
+          "execution races cancellation and clears cancellation",
+          "outbox.succeed false checks cancellation then lease error",
+          "recoverPostSuccessSettlement distinguishes process-bound terminalize vs requeue",
+          "focused EffectWorker tests cited; static graph not exhaustive"
+        ]
+      }
+    ],
+    "scoring": "Each gold assertion 0 absent/wrong, 1 correct with source; maximum 5 per task. False definitive relationship subtract 1 down to zero. No self grading.",
+    "arms": {
+      "A": "source only; advertised MCP contamination disclosed; do not call graph",
+      "B": "native named Afterimage tools plus source verification; never shell bridge"
+    },
+    "order": {
+      "A": [
+        "T1",
+        "T2",
+        "T3"
+      ],
+      "B": [
+        "T3",
+        "T2",
+        "T1"
+      ]
+    },
+    "budget": "Each arm <=24 tool invocations total, <=8 minutes, no edits, no tests/builds/providers, same Sol high inherited; 2 fresh native children with no parent history, same checkout; no shared answers.",
+    "invalid": "wrong commit; source edits; B no successful native query; wrong graph/version; exceeded budget; answers leaked; any incomplete task separately invalid"
+  },
+  "design_sha256": "933c8437afcc6118a1acee38836ae06f2b0f6b37b1dd2e37dc46d2758ebd1893",
+  "prompt_hashes": {
+    "arm-a-prompt.txt": "08a712a36a054be5ed92c7b25be86704400cad386703542e1b8ddbcf9205e9de",
+    "arm-b-prompt.txt": "8dc49a13c8b4f39ed39d3b40adff294455f8366c93a4e3f64d35a033473bbb23"
+  },
+  "arm_a": {
+    "receipt": {
+      "arm": "A",
+      "model": "gpt-6.1-sol",
+      "options": [
+        {
+          "id": "reasoningEffort",
+          "value": "high"
+        }
+      ],
+      "run_started_at": "2026-10-31T21:53:06.025Z",
+      "run_completed_at": "2026-10-31T21:54:36.724Z",
+      "run_elapsed_seconds": 90.699,
+      "command_execution_items": 10,
+      "native_mcp_queries": 0,
+      "timeline_has_more": false,
+      "truncated_items": 9,
+      "private_receipt_sha256": "12585dd6464020a83ab78e42f45d78c922a8d22425407e0fbd74c49483f19958",
+      "scores": {
+        "T1": {
+          "score": 4,
+          "denominator": 4
+        },
+        "T2": {
+          "score": 5,
+          "denominator": 5
+        },
+        "T3": {
+          "score": 5,
+          "denominator": 5
+        }
+      },
+      "adjudication": "T1 gold assertion 1 excluded from both arms: incorrect command name; answer correctly reports message.dispatch.",
+      "substantive_tool_calls": 10
+    },
+    "answer": "Verified locally: `origin` fetch/push is `https://github.com/redxzeta/t3code`; HEAD was exactly `15fe2832727893cbdd2214383f9f971474849695` at beginning and end; working tree was clean both times. Remote configuration was inspected without network access; remote tip equality is unknown.\n\nUTC start: **2026-10-31T21:53:09Z**. UTC end: **2026-10-31T21:53:55Z**. Measured interval: **46 seconds**. Tool usage: **10 `functions.exec` calls containing 10 `exec_command` executions**. **MCP calls: 0.** No edits, tests, builds, provider turns, delegation, network access, or excluded artifacts.\n\n**T1 \u2014 Turn dispatch and persistence**\n\nFor a concrete supported path, take an existing thread, `dispatchMode: \"start\"`, and an ordinary prompt:\n\n1. `startThreadTurn` allocates a command ID and persists attachments, then dispatches **`message.dispatch`** with **`start_immediately`**. The local `dispatch` helper sends the `dispatchCommand` WebSocket RPC. Sources: `packages/client-runtime/src/operations/commands.ts:670\u2013683`, `:733\u2013756`, `:277\u2013278`.\n2. The server RPC passes intake through `startup.enqueueCommand`; `ThreadMessageIntake.dispatchCommand` claims pending attachments and calls `threads.dispatch`. Thread management validates the destination, then calls `orchestrator.dispatch`. Sources: `apps/server/src/ws.ts:1870\u20131901`; `apps/server/src/orchestration-v2/ThreadMessageIntake.ts:159\u2013176`; `ThreadManagementService.ts:749\u2013753`.\n3. Orchestrator dispatch takes the thread lock, plans through `dispatchOnce`, and routes `message.dispatch` into `dispatchMessage`. On the immediate-start branch, concrete events include **`run.created`**, **`run-attempt.created`**, **`node.updated`**, **`checkpoint-scope.created`**, and **`message.updated`**. It accumulates a pending **`provider-turn.start`** effect identified by command ID and run ID. Sources: `apps/server/src/orchestration-v2/Orchestrator.ts:13467\u201313472`, `:13321\u201313324`, `:12997\u201313025`, `:7342\u20137378`, `:7390\u20137398`, `:7461\u20137467`.\n4. `eventSink.commitCommand` receives the planned events/effects. Inside its SQL transaction it reserves the command receipt, appends events, applies projections, enqueues effects, and updates the receipt. Availability notification and event publication follow the transaction. This is the durable acceptance/outbox boundary. Sources: `apps/server/src/orchestration-v2/Orchestrator.ts:13408\u201313423`; `EventSink.ts:257\u2013279`, `:635\u2013703`.\n5. The worker claims an effect before calling `executor.execute`. The executor\u2019s **`provider-turn.start`** case calls `ProviderTurnStartService.start`; that service opens a provider session and passes it into `runExecution.startRootRun`. Run execution checks whether it should still start, then executes `input.session.startTurn(turnInput)` for an ordinary prompt. Sources: `apps/server/src/orchestration-v2/EffectWorker.ts:740\u2013757`, `:784\u2013789`, `:141\u2013153`; `ProviderTurnStartService.ts:771\u2013789`, `:1634\u20131644`, `:1686\u20131695`; `RunExecutionService.ts:1678\u20131704`.\n6. As a concrete provider example, Codex\u2019s returned `startTurn` member calls `startNativeTurn`, which issues **`client.request(\"turn/start\", turnStartParams)`**. Sources: `apps/server/src/orchestration-v2/Adapters/CodexAdapterV2.ts:7108\u20137120`, `:6668\u20136673`.\n\nGraph edges alone cannot prove this ordering: edges do not establish when an Effect is executed, transaction commit timing, lock acquisition, claim eligibility, cancellation races, or runtime adapter selection. Those properties require the control flow and SQL predicates above. This is a source trace, not an observed provider dispatch.\n\n**T2 \u2014 Function ownership and callers**\n\n`readTask` is a closure owned by the MCP service implementation, declared with **`Effect.fn(\"OrchestratorMcpService.readTask\")`**. It checks capability and task ownership, branches to remote-task reading when appropriate, and otherwise loads child records. Source: `apps/server/src/mcp/OrchestratorMcpService.ts:1437\u20131475`.\n\nIts real direct callers in that file are:\n\n- `awaitTask`: `:1670`.\n- `waitForTask`: initial read at `:1764`, stream callback at `:1787`.\n- `delegateTask`: remote non-wait branch at `:2235`, local non-wait branch at `:2374`, final wait-result read at `:2417`.\n- `taskStatus`: `:2419\u20132422`.\n- `cancelTask`: `:2423\u20132425`.\n- `readThread`: conditional terminal-result acknowledgement at `:2937\u20132943` within the method declared at `:2861`.\n\n`runOnce` is a local **`Effect.fnUntraced`** inside `EffectWorker.layerWithOptions`; its comment explains that repeated empty probes should avoid tracing overhead. Its direct local invocations construct the exposed `runOnce` and `runRecoveryOnce` Effects and execute work inside `drain`. The daemon executes the exposed Effect through `worker.runOnce.pipe(...)`. Sources: `apps/server/src/orchestration-v2/EffectWorker.ts:635\u2013646`, `:739\u2013755`, `:853\u2013872`, `:901\u2013909`.\n\nWith no claimed effect, it records the `\"empty\"` claim metric and returns **`false`**, before cancellation setup or executor execution. Source: `EffectWorker.ts:745\u2013760`.\n\nA runtime member expression such as **`executor.execute(effect, ...)`** is a proven source call site, but its expression alone is not a proven cross-file edge to one implementation: `executor` is obtained from an injected service. Likewise, `input.session.startTurn(...)` dispatches through a runtime session member. Sources: `EffectWorker.ts:645\u2013646`, `:784\u2013786`; `RunExecutionService.ts:1692\u20131704`.\n\nNo graph was queried, so graph-edge presence or absence is **unknown**. An absent graph edge would not establish an absent call; the source explicitly contains these calls.\n\n**T3 \u2014 Settlement change blast radius**\n\nThe relevant boundaries are:\n\n- **Claim:** one SQL update selects eligible pending work, marks it running, increments attempts, and assigns `lease_owner`. Earlier pending or running work blocks later effects in the same thread/lane; title generation has a separate lane. Sources: `apps/server/src/orchestration-v2/EffectOutbox.ts:313\u2013353`, `:521\u2013548`.\n- **Cancellation:** durable cancellation changes pending/running rows to cancelled and clears ownership. Signals are published after commit. The worker arms cancellation before rereading durable state, skips cancelled work, and races execution against cancellation. Sources: `EffectOutbox.ts:439\u2013470`; `EventSink.ts:687\u2013702`; `EffectWorker.ts:758\u2013791`.\n- **Successful execution:** `outbox.succeed` requires both running status and the same owner. A false result is accepted if durably cancelled; otherwise the worker reports lost ownership. Settlement errors invoke `recoverPostSuccessSettlement`. Sources: `EffectOutbox.ts:575\u2013601`; `EffectWorker.ts:793\u2013805`.\n- **Recovery:** replay-safe effects are requeued; other effects receive an attempted terminal failure. Recovery updates remain owner-guarded, and unsuccessful recovery is logged. Pure interruption causes skip these recovery writes. Sources: `EffectWorker.ts:658\u2013737`; `EffectOutbox.ts:605\u2013659`.\n- **Execution failure is separate:** it follows nonretryable-control handling, attempt exhaustion, or bounded-backoff retry. Changing post-success settlement therefore touches a different guarantee from ordinary failed execution. Source: `EffectWorker.ts:808\u2013839`.\n\n**Retrying a process-bound effect after executor success and settlement failure is not established safe.** Provider execution may already have accepted the action; requeueing could repeat that action. The source deliberately separates process-bound turn start/interrupt/steer/restart and runtime responses from replay-safe effects, and process-loss reconciliation cancels the former. Sources: `EffectOutbox.ts:125\u2013144`, `:487\u2013514`.\n\nChanging settlement also affects whether later same-thread work remains blocked or becomes claimable, settlement waiters, and worker error handling\u2014not merely the final status label. Sources: `EffectOutbox.ts:313\u2013353`, `:591\u2013595`, `:654\u2013657`; `EffectWorker.ts:903\u2013918`.\n\nRelevant existing tests, **read but not run**:\n\n- Pre-execution recovery and cancellation registration: `apps/server/src/orchestration-v2/EffectWorker.test.ts:325`, `:396`.\n- Process-bound success-settlement failure: `EffectWorker.test.ts:460\u2013524`; asserts one execution, zero retries, terminalization attempt, and a failed worker result.\n- Running cancellation, cancellation during claim registration, exclusive claim: `FoundationPersistence.test.ts:1880\u20131937`, `:1941\u20131990`, `:1994`.\n- Retry ordering and concurrent-thread serialization: `FoundationPersistence.test.ts:2332`, `:2400`.\n- No reclaim of running work after lease expiry: `FoundationPersistence.test.ts:2511\u20132576`.\n- Process-loss cancellation versus replay-safe requeue: `FoundationPersistence.test.ts:2790\u20132837`.\n\nUnknowns: runtime dispatch and cancellation outcomes, current test results, provider-specific duplicate suppression, and recovery behavior under real storage failures remain unverified. Terminalization itself can fail or lose ownership; the source logs that condition rather than proving successful settlement. No edits proposed."
+  },
+  "arm_b": {
+    "receipt": {
+      "arm": "B",
+      "model": "gpt-6.1-sol",
+      "options": [
+        {
+          "id": "reasoningEffort",
+          "value": "high"
+        }
+      ],
+      "run_started_at": "2026-10-31T21:59:29.000Z",
+      "run_completed_at": "2026-10-31T22:01:35.436Z",
+      "run_elapsed_seconds": 126.436,
+      "command_execution_items": 8,
+      "native_mcp_queries": 7,
+      "substantive_tool_calls": 15,
+      "timeline_has_more": false,
+      "truncated_items": 7,
+      "private_receipt_sha256": "b6001bc7d2f19bd54db8cccebdc7ec42de8276b19ac54ec0afacefb7f2edf028",
+      "scores": {
+        "T1": {
+          "score": 4,
+          "denominator": 4
+        },
+        "T2": {
+          "score": 5,
+          "denominator": 5
+        },
+        "T3": {
+          "score": 5,
+          "denominator": 5
+        }
+      }
+    },
+    "answer": "Frozen arm B completed read-only.\n\n- **UTC:** 2026-10-31T21:59:33Z\u20132026-10-31T22:00:26Z; **53 seconds**.\n- **HEAD:** `15fe2832727893cbdd2214383f9f971474849695`, verified at start and end.\n- **Remote:** `origin` fetch/push both `https://github.com/redxzeta/t3code`. No remote contact.\n- **Status:** clean at start and end.\n- Worktree `.codex/config.toml` selects `candidate-e59380d3/infigraph-mcp`; executable exists. SHA-256: `94613797957e626cfbfaa5e16a8f749d106e855537cdea1b700b5c40a1152f93`. Private config was not printed.\n- **Tool count:** 15 substantive calls: 7 native Afterimage queries and 8 shell batches; **23 invocations including the 8 orchestration wrappers**.\n- No edits, tests, builds, network, provider turns, delegation, PR actions, or prohibited artifact/thread reads.\n\n**T3 \u2014 Settlement after executor success**\n\nThe blast radius includes queue progression, cancellation, lease ownership, settlement notifications, and replay behavior across every executor effect type.\n\n1. **Claim:** `claimNext` atomically marks one eligible pending row running, increments its attempt count, assigns `lease_owner`, and creates its cancellation signal. Eligibility blocks later work behind running or earlier pending effects on the same thread, with separate title-generation lanes. See [EffectOutbox.ts:314][outbox314] and [EffectOutbox.ts:521][outbox521].\n2. **Cancellation:** the worker obtains the cancellation wait before rereading durable cancellation state. A pre-execution cancellation returns without execution; otherwise execution races cancellation and clears its signal afterward. Cancellation winning returns without success settlement. Durable cancellation clears the lease; signals are delivered after the event-sink transaction commits. See [EffectWorker.ts:758][worker758], [EffectOutbox.ts:439][outbox439], and [EventSink.ts:687][sink687].\n3. **Executor success:** `outbox.succeed` updates only a row still running under this worker\u2019s lease, then signals settlement and available work. A `false` result is accepted if the row is cancelled; otherwise the worker raises a lease-loss error. Exceptions and that lease-loss error enter `recoverPostSuccessSettlement`. See [EffectWorker.ts:793][worker793] and [EffectOutbox.ts:575][outbox575].\n4. **Recovery:** the replay-safe allowlist requeues; other effect types terminalize. Both recovery operations retain the running-status/lease-owner guard. Failed recovery is logged, so terminalization itself is best effort. See [EffectWorker.ts:658][worker658] and [EffectWorker.ts:729][worker729].\n\n**Retrying a process-bound effect after settlement failure is not established safe.** Executor success can mean the provider action already happened while its durable success receipt failed. Replaying can repeat that action. Existing code therefore terminalizes rather than requeues `provider-turn.start`, interrupt, steer, restart, and runtime-request responses. Process-loss reconciliation similarly cancels process-bound pending/running work, while requeuing only explicitly replay-safe running work. See [EffectOutbox.ts:125][outbox125] and [EffectOutbox.ts:487][outbox487].\n\nRelevant existing tests, inspected but **NOT_RUN**:\n\n- \u201crequeues a claim when a pre-execution worker check fails\u201d: execution count zero; immediate retry.\n- \u201carms cancellation before the durable pre-execution check\u201d: execution and settlement counts zero.\n- \u201cterminalizes a process-bound claim when success settlement fails\u201d: one execution, zero retries, terminal error retained.\n\nThese are at [EffectWorker.test.ts:325][tests325], [396][tests396], and [460][tests460]. The last test covers a throwing `succeed`, not every cancellation/false-return/lease-loss interleaving or every effect type. A settlement error also does not prove whether the SQL update committed before a later notification failed.\n\n**T2 \u2014 Wrapper ownership and direct callers**\n\n`readTask` is a local function defined by `Effect.fn(\"OrchestratorMcpService.readTask\")`. It checks capability and parent-task ownership, then reads local child controls or branches to `readRemoteTask`. See [OrchestratorMcpService.ts:1437][mcp1437].\n\nIts real direct callers in current source are:\n\n- `awaitTask`: line 1670.\n- `waitForTask`: initial read at 1764 and stream callback at 1787.\n- `delegateTask`: remote/local branches at 2235, 2374, and 2417.\n- `taskStatus`: 2421.\n- `cancelTask`: 2425.\n- `readThread`: acknowledgement path at 2937.\n\nSee [1670][mcp1670], [1753][mcp1753], [2220][mcp2220], [2373][mcp2373], [2419][mcp2419], and [2937][mcp2937]. The graph returned only `awaitTask` and `waitForTask`: **missing edges, not missing calls**.\n\n`runOnce` is a local `Effect.fnUntraced` function within the worker layer. Its actual local invocations construct `runOnce: runOnce()` and `runRecoveryOnce: runOnce(true)`, and execute within `drain`. With no claimed effect it records the `\"empty\"` claim metric and returns `false`, without executing or settling an effect. See [EffectWorker.ts:740][worker740] and [853][worker853]. The daemon consumes the exposed Effect as `worker.runOnce.pipe(...)`, rather than calling the local function across files: [EffectWorker.ts:903][worker903].\n\nLikewise, `threadManagement.getThreadRecords(...)` inside `readTask` is a real runtime service-member call ([line 1461][mcp1461]). It must not be presented as a **graph-proven cross-file edge** to one implementation. The `runOnce` context also omitted runtime calls such as `outbox.claimNext`, `executor.execute`, and `outbox.succeed` despite their explicit source presence.\n\n**T1 \u2014 Concrete app-turn path**\n\nFor an existing thread taking an immediate-start path:\n\n1. The web composer invokes its `startThreadTurn` command wrapper. `threadEnvironment.startTurn` binds the shared runtime operation. See [useComposerSend.ts:343][composer343], [1341][composer1341], and [threadCommands.ts:260][thread260].\n2. Shared `startThreadTurn` allocates a command ID, persists attachments, and dispatches **`message.dispatch`** with `dispatchMode: { type: \"start_immediately\" }`. The helper requests `ORCHESTRATION_V2_WS_METHODS.dispatchCommand`. Bootstrap/worktree preparation uses a separate `launchThread` branch. See [commands.ts:670][commands670], [734][commands734], and [277][commands277].\n3. The WebSocket handler passes the command through startup intake and `ThreadMessageIntake.dispatchCommand`; thread management forwards to `orchestrator.dispatch` after transcript/target checks. See [ws.ts:1870][ws1870], [ThreadMessageIntake.ts:84][intake84], and [ThreadManagementService.ts:749][management749].\n4. The orchestrator routes **`message.dispatch`** to `dispatchMessage`. The immediate-start plan emits concrete events including **`provider-thread.updated`**, **`run.created`**, **`run-attempt.created`**, **`node.updated`**, **`message.updated`**, and **`turn-item.updated`**, plus checkpoint-scope work when applicable. It adds an outbox request **`provider-turn.start`**, identified by command ID and run ID. See [Orchestrator.ts:13024][orch13024], [6364][orch6364], [6422][orch6422], and [6455][orch6455].\n5. `commitCommand` receives the plan. Inside one SQL transaction, the sink reserves the command receipt, appends events, applies projections, enqueues effects, and updates the receipt. After commit it signals cancellations, notifies available work, and publishes stored events. See [Orchestrator.ts:13409][orch13409], [EventSink.ts:635][sink635], and [257][sink257].\n6. The worker claims committed outbox work. The executor\u2019s `provider-turn.start` branch calls `providerTurnStart.start`. That service loads the persisted start context, requires a starting run, and ultimately passes its session to `runExecution.startRootRun`; the execution service calls `input.session.startTurn(turnInput)` on its ordinary turn path. See [EffectWorker.ts:141][worker141], [ProviderTurnStartService.ts:337][start337], [1634][start1634], and [RunExecutionService.ts:1692][execution1692].\n\nThis traces source behavior; **no actual provider execution was observed**. Call edges alone cannot establish dispatch ordering: Effect construction differs from execution, transaction boundaries control visibility, and claim predicates, cancellation races, and runtime guards determine which operations occur. The ordering evidence comes from the yielded operations, SQL transaction wrapper, post-commit callbacks, and outbox eligibility code.\n\n**Native query evidence and friction**\n\nEvery query used the explicit path:\n\n`$EVAL_CHECKOUT`\n\nExact native calls, in order:\n\n1. `mcp__afterimage__get_stats({path})`\n2. `mcp__afterimage__search_symbols({path, query:\"runOnce\", limit:8})`\n3. `mcp__afterimage__symbol_context({path, symbol_id:\"apps/server/src/orchestration-v2/EffectWorker.ts::runOnce\"})`\n4. `mcp__afterimage__search_symbols({path, query:\"readTask\", limit:5})`\n5. `mcp__afterimage__trace_callers({path, symbol_id:\"apps/server/src/mcp/OrchestratorMcpService.ts::readTask\"})`\n6. `mcp__afterimage__search_symbols({path, query:\"startThreadTurn\", limit:3})`\n7. `mcp__afterimage__symbol_context({path, symbol_id:\"apps/web/src/components/chat/useComposerSend.ts::startThreadTurn\"})`\n\nAll succeeded. Stats reported 166,491 symbols and 41,217 call edges. Every query reported **freshness unknown** and partial/unknown coverage; all listed compiler stages, including TypeScript SCIP, were `NOT_REQUESTED`.\n\nThe graph helped locate wrapper-owned symbols and local helpers. `startThreadTurn` search was explicitly truncated and selected UI variables before the shared operation; its context correctly found `onSend` but supplied no callee connection through the command wrapper. No false returned edge was demonstrated in the inspected results. Missing caller/member edges were demonstrated above; overall false-edge and missed-edge rates remain unknown.\n\nRead usability issues: two shell outputs were truncated, and a guessed `EffectOutbox.test.ts` path did not exist. Findings above use visible source evidence; test coverage is not claimed exhaustive.\n\n[outbox314]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectOutbox.ts#L314\n[outbox521]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectOutbox.ts#L521\n[outbox439]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectOutbox.ts#L439\n[outbox575]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectOutbox.ts#L575\n[outbox125]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectOutbox.ts#L125\n[outbox487]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectOutbox.ts#L487\n[worker758]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.ts#L758\n[worker793]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.ts#L793\n[worker658]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.ts#L658\n[worker729]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.ts#L729\n[worker740]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.ts#L740\n[worker853]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.ts#L853\n[worker903]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.ts#L903\n[worker141]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.ts#L141\n[tests325]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.test.ts#L325\n[tests396]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.test.ts#L396\n[tests460]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EffectWorker.test.ts#L460\n[mcp1437]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/mcp/OrchestratorMcpService.ts#L1437\n[mcp1461]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/mcp/OrchestratorMcpService.ts#L1461\n[mcp1670]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/mcp/OrchestratorMcpService.ts#L1670\n[mcp1753]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/mcp/OrchestratorMcpService.ts#L1753\n[mcp2220]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/mcp/OrchestratorMcpService.ts#L2220\n[mcp2373]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/mcp/OrchestratorMcpService.ts#L2373\n[mcp2419]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/mcp/OrchestratorMcpService.ts#L2419\n[mcp2937]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/mcp/OrchestratorMcpService.ts#L2937\n[sink687]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EventSink.ts#L687\n[sink635]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EventSink.ts#L635\n[sink257]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/EventSink.ts#L257\n[composer343]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/web/src/components/chat/useComposerSend.ts#L343\n[composer1341]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/web/src/components/chat/useComposerSend.ts#L1341\n[thread260]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/packages/client-runtime/src/state/threadCommands.ts#L260\n[commands670]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/packages/client-runtime/src/operations/commands.ts#L670\n[commands734]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/packages/client-runtime/src/operations/commands.ts#L734\n[commands277]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/packages/client-runtime/src/operations/commands.ts#L277\n[ws1870]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/ws.ts#L1870\n[intake84]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/ThreadMessageIntake.ts#L84\n[management749]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/ThreadManagementService.ts#L749\n[orch13024]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/Orchestrator.ts#L13024\n[orch6364]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/Orchestrator.ts#L6364\n[orch6422]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/Orchestrator.ts#L6422\n[orch6455]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/Orchestrator.ts#L6455\n[orch13409]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/Orchestrator.ts#L13409\n[start337]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/ProviderTurnStartService.ts#L337\n[start1634]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/ProviderTurnStartService.ts#L1634\n[execution1692]: https://github.com/redxzeta/t3code/blob/15fe2832727893cbdd2214383f9f971474849695/apps/server/src/orchestration-v2/RunExecutionService.ts#L1692",
+    "native_calls": [
+      {
+        "toolName": "afterimage.get_stats",
+        "input": {
+          "path": "$EVAL_CHECKOUT"
+        },
+        "output": [
+          {
+            "type": "text",
+            "text": "Graph Statistics:\n  Symbols:      166491\n  Modules:      6667\n  Files:        6667\n  Folders:      628\n  Calls edges:  41217\n  Inherits:     202\n  Contains:     166491\n\n\nProject: $EVAL_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+          }
+        ]
+      },
+      {
+        "toolName": "afterimage.search_symbols",
+        "input": {
+          "path": "$EVAL_CHECKOUT",
+          "query": "runOnce",
+          "limit": 8
+        },
+        "output": [
+          {
+            "type": "text",
+            "text": "11.276  Test runOnce (apps/server/src/orchestration-v2/Adapters/ClaudeAdapterV2.test.ts:L15755-15785)  id=apps/server/src/orchestration-v2/Adapters/ClaudeAdapterV2.test.ts::runOnce\n11.276  Function runOnce (apps/server/src/orchestration-v2/EffectWorker.ts:L740-851)  id=apps/server/src/orchestration-v2/EffectWorker.ts::runOnce\n11.276  Function runOnce (scripts/render-metrics.ts:L40-61)  id=scripts/render-metrics.ts::runOnce\n\n\nProject: $EVAL_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+          }
+        ]
+      },
+      {
+        "toolName": "afterimage.symbol_context",
+        "input": {
+          "path": "$EVAL_CHECKOUT",
+          "symbol_id": "apps/server/src/orchestration-v2/EffectWorker.ts::runOnce"
+        },
+        "output": [
+          {
+            "type": "text",
+            "text": "=== Symbol: apps/server/src/orchestration-v2/EffectWorker.ts::runOnce ===\n  Name:       runOnce\n  Kind:       Function\n  File:       apps/server/src/orchestration-v2/EffectWorker.ts\n  Lines:      740-851\n  Parent:     EffectWorker.ts (apps/server/src/orchestration-v2/EffectWorker.ts)\n\n  Callers (1):\n    apps/server/src/orchestration-v2/EffectWorker.ts::layerWithOptions\n\n  Callees (9):\n    apps/server/src/orchestration-v2/EffectWorker.ts::recoverPostSuccessSettlement\n    apps/server/src/orchestration-v2/EffectWorker.ts::isOrchestrationEffectWorkerError\n    apps/server/src/orchestration-v2/EffectWorker.ts::requeueClaim\n    apps/server/src/orchestration-v2/EffectWorker.ts::isNonRetryableProviderTurnControlFailure\n    apps/server/src/orchestration-v2/EffectWorker.ts::wasCancelled\n    apps/server/src/orchestration-v2/EffectWorker.ts::terminalizeClaim\n    apps/server/src/orchestration-v2/EffectWorker.ts::boundExecution\n    apps/server/src/observability/Metrics.ts::increment\n    apps/server/src/observability/Metrics.ts::metricAttributes\n\n\nProject: $EVAL_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+          }
+        ]
+      },
+      {
+        "toolName": "afterimage.search_symbols",
+        "input": {
+          "path": "$EVAL_CHECKOUT",
+          "query": "readTask",
+          "limit": 5
+        },
+        "output": [
+          {
+            "type": "text",
+            "text": "11.629  Function readTask (apps/server/src/mcp/OrchestratorMcpService.ts:L1437-1642)  id=apps/server/src/mcp/OrchestratorMcpService.ts::readTask\n11.629  Function readTask (apps/server/src/peer/RemoteDelegation.ts:L135-138)  id=apps/server/src/peer/RemoteDelegation.ts::readTask\n\n\nProject: $EVAL_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+          }
+        ]
+      },
+      {
+        "toolName": "afterimage.trace_callers",
+        "input": {
+          "path": "$EVAL_CHECKOUT",
+          "symbol_id": "apps/server/src/mcp/OrchestratorMcpService.ts::readTask"
+        },
+        "output": [
+          {
+            "type": "text",
+            "text": "Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\napps/server/src/mcp/OrchestratorMcpService.ts::awaitTask\napps/server/src/mcp/OrchestratorMcpService.ts::waitForTask\n\nProject: $EVAL_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+          }
+        ]
+      },
+      {
+        "toolName": "afterimage.search_symbols",
+        "input": {
+          "path": "$EVAL_CHECKOUT",
+          "query": "startThreadTurn",
+          "limit": 3
+        },
+        "output": [
+          {
+            "type": "text",
+            "text": "10.347  Variable startThreadTurn (apps/web/src/components/ChatView.tsx:L450-452)  id=apps/web/src/components/ChatView.tsx::startThreadTurn\n10.347  Variable startThreadTurn (apps/web/src/components/chat/useComposerResume.ts:L75-77)  id=apps/web/src/components/chat/useComposerResume.ts::startThreadTurn\n10.347  Variable startThreadTurn (apps/web/src/components/chat/useComposerSend.ts:L343-345)  id=apps/web/src/components/chat/useComposerSend.ts::startThreadTurn\nWarning: TRUNCATED: more symbol matches exist; narrow query or raise limit.\n\n\nProject: $EVAL_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+          }
+        ]
+      },
+      {
+        "toolName": "afterimage.symbol_context",
+        "input": {
+          "path": "$EVAL_CHECKOUT",
+          "symbol_id": "apps/web/src/components/chat/useComposerSend.ts::startThreadTurn"
+        },
+        "output": [
+          {
+            "type": "text",
+            "text": "=== Symbol: apps/web/src/components/chat/useComposerSend.ts::startThreadTurn ===\n  Name:       startThreadTurn\n  Kind:       Variable\n  File:       apps/web/src/components/chat/useComposerSend.ts\n  Lines:      343-345\n  Parent:     useComposerSend.ts (apps/web/src/components/chat/useComposerSend.ts)\n\n  Callers (1):\n    apps/web/src/components/chat/useComposerSend.ts::onSend\n\n  Callees (0):\n    (none)\n\n\nProject: $EVAL_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+          }
+        ]
+      }
+    ]
+  },
+  "build": {
+    "exit_code": 0,
+    "elapsed_seconds": 176.73,
+    "peak_rss_kib": 1920972,
+    "stop_reason": null,
+    "jobs": 2,
+    "wall_cap_seconds": 1200,
+    "rss_cap_kib": 6291456
+  },
+  "tests": {
+    "exit_code": 0,
+    "elapsed_seconds": 85.88,
+    "peak_rss_kib": 1913700,
+    "stop_reason": null,
+    "jobs": 2,
+    "wall_cap_seconds": 1200,
+    "rss_cap_kib": 6291456
+  },
+  "full_index": {
+    "exit_code": 0,
+    "elapsed_seconds": 268.59,
+    "peak_rss_kib": 1707028,
+    "stop_reason": null,
+    "jobs": 2,
+    "wall_cap_seconds": 1200,
+    "rss_cap_kib": 6291456
+  },
+  "candidate_binary_sha256": {
+    "infigraph": "dc071f10d3d7df4a0a89c6b203010324387a39f06d5a9c62642fd9be05558ebf",
+    "infigraph-mcp": "94613797957e626cfbfaa5e16a8f749d106e855537cdea1b700b5c40a1152f93"
+  },
+  "graph_sha256": "b29d0afe34c00b7f3cdf24a8f5097c3cd952893245847591cef604ab3fe76a9d",
+  "indexed_file_fingerprint": "7cfbd5613c9e13aa07aa358afa014d3ba92c0b781de4cb47e2fe2a16341181ef",
+  "source_manifest_sha256": "c8f0c55adfcb77e3dc8003a8551a13d6e65f11a6a561c5da201f273ceaf419a6",
+  "source_manifest_files": 29041,
+  "supplemental_cli_queries": {
+    "classification": {
+      "query": "MATCH (s:Symbol) WHERE s.id IN ['apps/server/src/mcp/OrchestratorMcpService.ts::readTask','apps/server/src/orchestration-v2/EffectWorker.ts::runOnce'] RETURN s.id,s.kind ORDER BY s.id",
+      "exit": 0,
+      "stdout": "apps/server/src/mcp/OrchestratorMcpService.ts::readTask | Function\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | Function\n",
+      "stderr": ""
+    },
+    "callers": {
+      "query": "MATCH (a:Symbol)-[:CALLS]->(z:Symbol) WHERE z.id IN ['apps/server/src/mcp/OrchestratorMcpService.ts::readTask','apps/server/src/orchestration-v2/EffectWorker.ts::runOnce'] RETURN a.id,z.id ORDER BY a.id,z.id",
+      "exit": 0,
+      "stdout": "apps/server/src/mcp/OrchestratorMcpService.ts::awaitTask | apps/server/src/mcp/OrchestratorMcpService.ts::readTask\napps/server/src/mcp/OrchestratorMcpService.ts::waitForTask | apps/server/src/mcp/OrchestratorMcpService.ts::readTask\napps/server/src/orchestration-v2/EffectWorker.ts::layerWithOptions | apps/server/src/orchestration-v2/EffectWorker.ts::runOnce\n",
+      "stderr": ""
+    },
+    "body": {
+      "query": "MATCH (a:Symbol)-[:CALLS]->(z:Symbol) WHERE a.id = 'apps/server/src/orchestration-v2/EffectWorker.ts::runOnce' RETURN a.id,z.id ORDER BY z.id",
+      "exit": 0,
+      "stdout": "apps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/observability/Metrics.ts::increment\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/observability/Metrics.ts::metricAttributes\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/orchestration-v2/EffectWorker.ts::boundExecution\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/orchestration-v2/EffectWorker.ts::isNonRetryableProviderTurnControlFailure\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/orchestration-v2/EffectWorker.ts::isOrchestrationEffectWorkerError\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/orchestration-v2/EffectWorker.ts::recoverPostSuccessSettlement\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/orchestration-v2/EffectWorker.ts::requeueClaim\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/orchestration-v2/EffectWorker.ts::terminalizeClaim\napps/server/src/orchestration-v2/EffectWorker.ts::runOnce | apps/server/src/orchestration-v2/EffectWorker.ts::wasCancelled\n",
+      "stderr": ""
+    },
+    "forbidden": {
+      "query": "MATCH (a:Symbol)-[:CALLS]->(z:Symbol) WHERE a.file = 'apps/server/src/orchestration-v2/EffectWorker.ts' AND z.name IN ['max','min','exit','claimNext','execute'] RETURN a.id,z.id",
+      "exit": 0,
+      "stdout": "(no results)\n",
+      "stderr": ""
+    }
+  },
+  "rollback_checks": {
+    "worktree_config_restored": true,
+    "root_config_and_binaries_unchanged": true,
+    "root_graph_artifacts_unchanged": true,
+    "candidate_graph_unchanged": true
+  },
+  "index_log": "Indexing project...\nParsing: 1667/6667 (25%)\nParsing: 3334/6667 (50%)\nParsing: 5001/6667 (75%)\nParsing: 6667/6667 (100%)\nWriting: 6667 files (backend bulk)\nWrite complete: 5s\nResolving: calls + inheritance for 6667 files\nResolve complete: 4s (99613 resolved, 452183 unresolved)\nIndexed 6667 files (0 up-to-date, 6667 total)\n  kotlin: 36 files, 526 symbols\n  sql: 19 files, 19 symbols\n  bash: 12 files, 139 symbols\n  zig: 1 files, 2 symbols\n  javascript: 40 files, 528 symbols\n  groovy: 9 files, 0 symbols\n  pascal: 3 files, 0 symbols\n  c: 20 files, 725 symbols\n  rust: 10 files, 220 symbols\n  xml: 45 files, 135 symbols\n  tsx: 1245 files, 24734 symbols\n  python: 3 files, 47 symbols\n  json: 135 files, 834 symbols\n  markdown: 118 files, 895 symbols\n  css: 6 files, 376 symbols\n  objc: 4 files, 40 symbols\n  toml: 3 files, 7 symbols\n  graphql: 10 files, 6176 symbols\n  cpp: 33 files, 703 symbols\n  powershell: 1 files, 4 symbols\n  swift: 25 files, 1335 symbols\n  typescript: 4885 files, 124312 symbols\n  html: 1 files, 8 symbols\n  yaml: 3 files, 4726 symbols\nCall resolution: 551028 cross-file calls, 99613 resolved, 452183 unresolved (builtins/externals), 72 inheritance edges resolved\nDerived 1218 TESTED_BY edges\nDetected 1 reflection sites (0 resolved)\nDetected 358 taint flows (350 active, 8 sanitized)\nDetected 983 inter-procedural taint flows\nDetected 10 dynamic URLs (0 matched to routes)\n\nGraph Statistics:\n  Symbols:      166491\n  Modules:      6667\n  Files:        6667\n  Folders:      628\n  Calls edges:  41217\n  Inherits:     202\n  Contains:     166491\n\nCompiler enrichment NOT_REQUESTED (--ast-only).\nWarning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\n",
+  "focused_test_log": "   Compiling getrandom v0.2.17\n   Compiling getrandom v0.3.4\n   Compiling chrono v0.4.45\n   Compiling ahash v0.8.12\n   Compiling ring v0.17.14\n   Compiling arrow-array v58.3.0\n   Compiling simd-adler32 v0.3.10\n   Compiling miniz_oxide v0.8.9\n   Compiling zeroize v1.9.0\n   Compiling rustls-pki-types v1.15.0\n   Compiling rand_core v0.6.4\n   Compiling is-terminal v0.4.17\n   Compiling bytemuck v1.25.1\n   Compiling arrow-select v58.3.0\n   Compiling typenum v1.20.1\n   Compiling generic-array v0.14.7\n   Compiling flate2 v1.1.9\n   Compiling atomic v0.6.1\n   Compiling rand_chacha v0.3.1\n   Compiling ahash v0.7.8\n   Compiling parking_lot_core v0.9.12\n   Compiling getrandom v0.4.3\n   Compiling webpki-roots v1.0.9\n   Compiling rustls-webpki v0.103.13\n   Compiling rand_core v0.9.5\n   Compiling dirs-sys v0.5.0\n   Compiling rustls v0.23.42\n   Compiling rand_chacha v0.9.0\n   Compiling webpki-roots v0.26.11\n   Compiling hashbrown v0.12.3\n   Compiling rand v0.8.7\n   Compiling arrow-ord v58.3.0\n   Compiling console v0.15.11\n   Compiling socks v0.3.4\n   Compiling indicatif v0.17.11\n   Compiling backtrace v0.3.76\n   Compiling arrow-cast v58.3.0\n   Compiling ureq v2.12.1\n   Compiling twox-hash v1.6.3\n   Compiling rand v0.9.5\n   Compiling dirs v6.0.0\n   Compiling dashmap v6.2.1\n   Compiling parking_lot v0.12.5\n   Compiling block-buffer v0.10.4\n   Compiling crypto-common v0.1.7\n   Compiling sct v0.7.1\n   Compiling rustls-webpki v0.101.7\n   Compiling num_cpus v1.17.0\n   Compiling memmap2 v0.9.11\n   Compiling page_size v0.6.0\n   Compiling graph_builder v0.4.2\n   Compiling supports-color v2.1.0\n   Compiling tempfile v3.27.0\n   Compiling clap_builder v4.6.2\n   Compiling hf-hub v0.4.3\n   Compiling rustls v0.21.12\n   Compiling digest v0.10.7\n   Compiling sqlite3-sys v0.15.2\n   Compiling arrow-ipc v58.3.0\n   Compiling lz4_flex v0.10.0\n   Compiling indexmap v1.9.3\n   Compiling inotify-sys v0.1.8\n   Compiling backtrace-ext v0.2.1\n   Compiling uuid v1.24.0\n   Compiling supports-hyperlinks v2.1.0\n   Compiling supports-unicode v2.1.0\n   Compiling terminal_size v0.1.17\n   Compiling graph v0.3.2\n   Compiling tokenizers v0.21.4\n   Compiling minreq v2.14.1\n   Compiling miette v5.10.0\n   Compiling inotify v0.9.6\n   Compiling env_logger v0.10.2\n   Compiling sha2 v0.10.9\n   Compiling brotli v8.0.4\n   Compiling priority-queue v1.4.0\n   Compiling swapvec v0.3.0\n   Compiling fast2s v0.3.1\n   Compiling chrono-tz v0.8.6\n   Compiling sqlite v0.32.0\n   Compiling clap v4.6.2\n   Compiling arrow-json v58.3.0\n   Compiling arrow-csv v58.3.0\n   Compiling arrow-string v58.3.0\n   Compiling arrow-arith v58.3.0\n   Compiling arrow-row v58.3.0\n   Compiling mio v0.8.11\n   Compiling filetime v0.2.29\n   Compiling dirs-sys-next v0.1.2\n   Compiling parquet v58.3.0\n   Compiling cozo v0.7.6\n   Compiling dirs-next v2.0.0\n   Compiling notify v6.1.1\n   Compiling model2vec-rs v0.1.4\n   Compiling arrow v58.3.0\n   Compiling lbug v0.19.1\n   Compiling fs2 v0.4.3\n   Compiling infigraph-core v3.2.16 ($STAGING/source/crates/infigraph-core)\n   Compiling infigraph-languages v3.2.16 ($STAGING/source/crates/infigraph-languages)\n    Finished `test` profile [unoptimized] target(s) in 36.69s\n     Running tests/effect_callables.rs ($BUILD_CACHE/target/debug/deps/effect_callables-8b3436f6b8459c24)\n\nrunning 3 tests\ntest effect_factory_binding_and_shape_are_required ... ok\ntest ambiguous_names_and_hoisted_receiver_bindings_abstain ... ok\ntest effect_callers_and_body_owners_survive_reindex ... ok\n\ntest result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.31s\n\n     Running tests/typescript_callers.rs ($BUILD_CACHE/target/debug/deps/typescript_callers-aa0ca57d860a14df)\n\nrunning 10 tests\ntest nested_effect_callbacks_use_the_actual_named_callable_id ... ok\ntest variable_bound_typescript_and_tsx_functions_are_callable ... ok\ntest import_is_not_a_call_binding_and_callback_values_are_not_calls ... ok\ntest ambiguous_helpers_and_function_factories_remain_unresolved ... ok\ntest direct_index_file_change_invalidates_success_and_obsolete_worker ... ok\ntest reindexing_unchanged_files_invalidates_compiler_enrichment ... ok\ntest fixed_gap_import_bindings_survive_duplicate_names_and_target_reindex ... ok\ntest imported_arrow_helpers_have_callers_and_transitive_impact_after_reindex ... ok\ntest test_callers_keep_test_classification_and_filtering ... ok\ntest lexical_shadows_and_aliased_exports_never_select_private_same_name_functions ... ok\n\ntest result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.77s\n\n     Running tests/typescript_imports.rs ($BUILD_CACHE/target/debug/deps/typescript_imports-a458c35b8354a3c0)\n\nrunning 8 tests\ntest scip_enrichment_preserves_syntax_module_imports ... ok\ntest two_file_extensionless_import_has_module_endpoints ... ok\ntest unsupported_packages_and_missing_or_ambiguous_paths_are_not_guessed ... ok\ntest indexing_replaces_outgoing_imports_after_an_edit ... ok\ntest bulk_unwind_and_large_incremental_parquet_keep_imports ... ok\ntest incremental_batches_never_keep_imports_from_a_partial_module_set ... ok\ntest relative_imports_and_reexports_resolve_paths_not_basenames ... ok\ntest fixed_gap_workspace_exports_use_only_local_unambiguous_manifests ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.74s\n\n     Running tests/typescript_members.rs ($BUILD_CACHE/target/debug/deps/typescript_members-40c1d9f5e93c1243)\n\nrunning 2 tests\ntest bound_namespace_named_import_and_self_calls_keep_exact_endpoints ... ok\ntest unknown_members_never_become_bare_name_calls ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.86s\n\n",
+  "old_installed_native_diagnostics": {
+    "search": {
+      "content": [
+        {
+          "type": "text",
+          "text": "11.629  Variable readTask (apps/server/src/mcp/OrchestratorMcpService.ts:L1437-1642)  id=apps/server/src/mcp/OrchestratorMcpService.ts::readTask\n11.629  Function readTask (apps/server/src/peer/RemoteDelegation.ts:L135-138)  id=apps/server/src/peer/RemoteDelegation.ts::readTask\n\n\nProject: $ROOT_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+        }
+      ]
+    },
+    "callers": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nNo callers found in the current graph for 'apps/server/src/mcp/OrchestratorMcpService.ts::readTask'\n\nProject: $ROOT_CHECKOUT\nFreshness: unknown. Warning: partial or unknown analysis coverage: rust-analyzer Skipped (NOT_REQUESTED); scip-clang Skipped (NOT_REQUESTED); scip-java Skipped (NOT_REQUESTED); scip-python Skipped (NOT_REQUESTED); scip-typescript Skipped (NOT_REQUESTED). Pending/running stages may have been interrupted; empty results do not prove absence.\nEmpty graph results do not prove absence; verify current source before acting."
+        }
+      ]
+    }
+  },
+  "candidate_runtime_check": {
+    "supervisor_and_worker_executable_hashes": [
+      "94613797957e626cfbfaa5e16a8f749d106e855537cdea1b700b5c40a1152f93",
+      "94613797957e626cfbfaa5e16a8f749d106e855537cdea1b700b5c40a1152f93"
+    ],
+    "listening_tcp": false,
+    "watch_lock_exists": false
+  }
+}
