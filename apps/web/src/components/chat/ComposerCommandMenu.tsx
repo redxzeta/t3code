@@ -24,11 +24,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { memo, useLayoutEffect, useRef } from "react";
+import { LegendList, type LegendListRef } from "@legendapp/list/react";
 
 import { type ComposerSlashCommand, type ComposerTriggerKind } from "../../composer-logic";
 import { cn } from "~/lib/utils";
 import { Badge } from "../ui/badge";
-import { Command, CommandGroup, CommandItem, CommandList } from "../ui/command";
+import { Command, CommandItem, CommandListVirtualized } from "../ui/command";
 import { EnvironmentMachineIcon } from "../EnvironmentMachineIcon";
 import { PierreEntryIcon } from "./PierreEntryIcon";
 import { ComposerBanner } from "./ComposerBanner";
@@ -101,21 +102,21 @@ export const ComposerCommandMenu = memo(function ComposerCommandMenu(props: {
   onHighlightedItemChange: (itemId: string | null) => void;
   onSelect: (item: ComposerCommandItem) => void;
 }) {
-  const listRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<LegendListRef>(null);
 
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- scrolls the highlighted menu item's DOM node into view
+  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- reveals the externally highlighted row through the virtual list's scroll API
   useLayoutEffect(() => {
-    if (!props.activeItemId || !listRef.current) return;
-    const el = listRef.current.querySelector<HTMLElement>(
-      `[data-composer-item-id="${CSS.escape(props.activeItemId)}"]`,
-    );
-    el?.scrollIntoView({ block: "nearest" });
-  }, [props.activeItemId]);
+    const activeIndex = props.items.findIndex((item) => item.id === props.activeItemId);
+    if (activeIndex < 0) return;
+    void listRef.current?.scrollIndexIntoView({ index: activeIndex, animated: false });
+  }, [props.activeItemId, props.items]);
 
   return (
     <Command
       autoHighlight={false}
       mode="none"
+      items={props.items.map((item) => item.id)}
+      virtualized
       onItemHighlighted={(highlightedValue) => {
         props.onHighlightedItemChange(
           typeof highlightedValue === "string" ? highlightedValue : null,
@@ -123,31 +124,44 @@ export const ComposerCommandMenu = memo(function ComposerCommandMenu(props: {
       }}
     >
       <ComposerBanner.Surface
-        ref={listRef}
         className="flex min-h-0 w-full flex-col overflow-hidden pb-(--chat-composer-attachment-overlap) **:data-[slot=command-item]:rounded-lg **:data-[slot=scroll-area-scrollbar]:data-[orientation=vertical]:my-4"
         data-composer-command-drawer="true"
       >
         {props.items.length > 0 ? (
-          <CommandList
-            id={props.listId}
-            aria-label={props.triggerKind ? LISTBOX_LABEL_BY_TRIGGER[props.triggerKind] : undefined}
-            className="max-h-72 min-h-0 scroll-pb-6"
-          >
-            <CommandGroup>
-              {props.items.map((item) => (
-                <ComposerCommandMenuItem
-                  key={item.id}
-                  optionId={composerSuggestionOptionId(props.listId, item.id)}
-                  item={item}
-                  triggerKind={props.triggerKind}
-                  resolvedTheme={props.resolvedTheme}
-                  isActive={props.activeItemId === item.id}
-                  onHighlight={props.onHighlightedItemChange}
-                  onSelect={props.onSelect}
-                />
-              ))}
-            </CommandGroup>
-          </CommandList>
+          <div className="p-2">
+            <CommandListVirtualized
+              id={props.listId}
+              aria-label={
+                props.triggerKind ? LISTBOX_LABEL_BY_TRIGGER[props.triggerKind] : undefined
+              }
+            >
+              <LegendList
+                ref={listRef}
+                data={props.items}
+                keyExtractor={(item) => item.id}
+                getItemType={(item) => item.type}
+                extraData={props.activeItemId}
+                recycleItems={false}
+                estimatedItemSize={32}
+                drawDistance={64}
+                style={{ maxHeight: "17rem" }}
+                className="min-h-0 overflow-x-hidden overscroll-y-contain scroll-py-2"
+                renderItem={({ item, index }) => (
+                  <ComposerCommandMenuItem
+                    index={index}
+                    itemCount={props.items.length}
+                    optionId={composerSuggestionOptionId(props.listId, item.id)}
+                    item={item}
+                    triggerKind={props.triggerKind}
+                    resolvedTheme={props.resolvedTheme}
+                    isActive={props.activeItemId === item.id}
+                    onHighlight={props.onHighlightedItemChange}
+                    onSelect={props.onSelect}
+                  />
+                )}
+              />
+            </CommandListVirtualized>
+          </div>
         ) : (
           <div className="px-5 pt-3.5 pb-7">
             <p className="text-secondary-label text-xs">
@@ -172,6 +186,8 @@ export const ComposerCommandMenu = memo(function ComposerCommandMenu(props: {
 });
 
 const ComposerCommandMenuItem = memo(function ComposerCommandMenuItem(props: {
+  index: number;
+  itemCount: number;
   optionId: string;
   item: ComposerCommandItem;
   triggerKind: ComposerTriggerKind | null;
@@ -190,6 +206,9 @@ const ComposerCommandMenuItem = memo(function ComposerCommandMenuItem(props: {
   return (
     <CommandItem
       render={<div id={props.optionId} />}
+      index={props.index}
+      aria-posinset={props.index + 1}
+      aria-setsize={props.itemCount}
       aria-selected={props.isActive}
       value={props.item.id}
       data-composer-item-id={props.item.id}
