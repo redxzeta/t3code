@@ -1703,6 +1703,103 @@ it.layer(layerGitManagerTest)("GitManager", (it) => {
     }),
   );
 
+  it.effect("squash-merged heads report only actionable work", () =>
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      for (const variant of [
+        "deleted",
+        "preserved",
+        "non-origin",
+        "new-commit",
+        "dirty",
+        "wrong-base",
+        "missing-sha",
+        "malformed-sha",
+        "open",
+        "tracks-base",
+      ] as const) {
+        const repoDir = yield* makeTempDir("t3code-merged-status-");
+        yield* initRepo(repoDir);
+        const remoteDir = yield* createBareRemote();
+        const remote = variant === "non-origin" ? "fork" : "origin";
+        yield* runGit(repoDir, ["remote", "add", remote, remoteDir]);
+        yield* runGit(repoDir, ["push", "-u", remote, "main"]);
+        yield* runGit(repoDir, [
+          "symbolic-ref",
+          `refs/remotes/${remote}/HEAD`,
+          `refs/remotes/${remote}/main`,
+        ]);
+        yield* runGit(repoDir, ["switch", "-c", "feature/shipped"]);
+        yield* fs.writeFileString(NodePath.join(repoDir, "shipped.txt"), "shipped\n");
+        yield* runGit(repoDir, ["add", "."]);
+        yield* runGit(repoDir, ["commit", "-m", "Feature"]);
+        const headSha = (yield* runGit(repoDir, ["rev-parse", "HEAD"])).stdout.trim();
+        yield* runGit(repoDir, ["push", "-u", remote, "feature/shipped"]);
+        yield* runGit(repoDir, ["switch", "main"]);
+        yield* runGit(repoDir, ["merge", "--squash", "feature/shipped"]);
+        yield* runGit(repoDir, ["commit", "-m", "Squashed feature"]);
+        yield* runGit(repoDir, ["push", remote, "main"]);
+        yield* runGit(repoDir, ["switch", "feature/shipped"]);
+        if (variant !== "preserved") {
+          yield* runGit(repoDir, ["push", remote, "--delete", "feature/shipped"]);
+        }
+        if (variant === "tracks-base") {
+          yield* runGit(repoDir, ["branch", "--set-upstream-to", `${remote}/main`]);
+        }
+        if (variant === "dirty" || variant === "new-commit") {
+          yield* fs.writeFileString(NodePath.join(repoDir, "next.txt"), "next\n");
+          if (variant === "new-commit") {
+            yield* runGit(repoDir, ["add", "."]);
+            yield* runGit(repoDir, ["commit", "-m", "Next work"]);
+          }
+        }
+        const { manager, providerCalls } = yield* makeManager({
+          providerScenario: {
+            prListOtherwise: [
+              {
+                number: 28467,
+                title: "Shipped",
+                url: "https://github.com/test/repo/pull/28467",
+                baseRefName: variant === "wrong-base" ? "release" : "main",
+                headRefName: "feature/shipped",
+                state: variant === "open" ? "open" : "merged",
+                ...(variant === "missing-sha"
+                  ? {}
+                  : { headSha: variant === "malformed-sha" ? "invalid" : headSha }),
+              },
+            ],
+          },
+        });
+        const status = yield* manager.status({ cwd: repoDir });
+        const git = yield* GitVcsDriver.GitVcsDriver;
+        const localDetails = yield* git.statusDetails(repoDir);
+        expect(localDetails.hasUpstream, variant).toBe(status.hasUpstream);
+        if (variant === "dirty") expect(status.branchChanges?.insertions).toBe(1);
+        if (variant === "new-commit") {
+          const result = yield* runStackedAction(manager, { cwd: repoDir, action: "push" });
+          expect(result.push.status).toBe("pushed");
+        }
+        const shipped = ["deleted", "preserved", "non-origin", "dirty"].includes(variant);
+        expect(status.aheadOfDefaultCount, variant).toBe(
+          shipped ? 0 : 1 + Number(variant === "new-commit"),
+        );
+        if (shipped) expect(status.aheadCount, variant).toBe(0);
+        if (variant === "tracks-base") expect(status.aheadCount).toBe(1);
+        expect(status.hasWorkingTreeChanges, variant).toBe(variant === "dirty");
+        if (variant === "deleted" || variant === "preserved" || variant === "non-origin") {
+          expect(status.branchChanges?.insertions, variant).toBe(0);
+          expect(status.branchChanges?.deletions, variant).toBe(0);
+          const error = yield* runStackedAction(manager, {
+            cwd: repoDir,
+            action: "create_pr",
+          }).pipe(Effect.flip);
+          expect(error.message).toContain("already merged");
+          expect(created(providerCalls)).toEqual([]);
+        }
+      }
+    }),
+  );
+
   it.effect("status finds a merged PR after its remote branch was deleted", () =>
     Effect.gen(function* () {
       const repoDir = yield* makeTempDir("t3code-git-manager-");
@@ -3097,16 +3194,14 @@ it.layer(layerGitManagerTest)("GitManager", (it) => {
 
       const { manager, providerCalls } = yield* makeManager({
         providerScenario: {
-          prListSequence: [
-            [
-              {
-                number: 42,
-                title: "Existing PR",
-                url: "https://github.com/pingdotgg/codething-mvp/pull/42",
-                baseRefName: "main",
-                headRefName: "feature/existing-pr",
-              },
-            ],
+          prListOtherwise: [
+            {
+              number: 42,
+              title: "Existing PR",
+              url: "https://github.com/pingdotgg/codething-mvp/pull/42",
+              baseRefName: "main",
+              headRefName: "feature/existing-pr",
+            },
           ],
         },
       });
@@ -3766,6 +3861,7 @@ it.layer(layerGitManagerTest)("GitManager", (it) => {
         const { manager, providerCalls } = yield* makeManager({
           providerScenario: {
             prListSequence: [
+              [],
               [
                 {
                   number: 1661,
@@ -3848,6 +3944,7 @@ it.layer(layerGitManagerTest)("GitManager", (it) => {
         providerScenario: {
           prListSequenceByHeadSelector: {
             statemachine: [
+              [],
               [],
               [
                 {

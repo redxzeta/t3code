@@ -578,6 +578,7 @@ function appendUnique(values: string[], next: string | null | undefined): void {
 }
 
 function toStatusPr(pr: PullRequestInfo): {
+  headSha: string | null;
   number: number;
   title: string;
   url: string;
@@ -588,6 +589,7 @@ function toStatusPr(pr: PullRequestInfo): {
   updatedAt: string | null;
 } {
   return {
+    headSha: pr.headSha ?? null,
     number: pr.number,
     title: pr.title,
     url: pr.url,
@@ -1371,6 +1373,24 @@ export const make = Effect.gen(function* () {
       }),
     );
   });
+  const isMergedHead = Effect.fn("GitManager.isMergedHead")(
+    function* (cwd: string, branch: string | null, pr: ReturnType<typeof toStatusPr> | null) {
+      if (
+        pr?.state !== "merged" ||
+        pr.headRef !== branch ||
+        !pr.headSha ||
+        !/^[0-9a-f]{40,64}$/i.test(pr.headSha)
+      )
+        return false;
+      const remote = yield* gitCore.resolvePrimaryRemoteName(cwd);
+      const defaultBranch = yield* gitCore.resolveDefaultBranchName(cwd, remote);
+      if (defaultBranch === null || pr.baseRef !== defaultBranch || branch === defaultBranch)
+        return false;
+      const head = yield* gitCore.resolveCommit({ cwd, revision: "HEAD" });
+      return head.commitSha === pr.headSha;
+    },
+    Effect.orElseSucceed(() => false),
+  );
   const readRemoteStatus = Effect.fn("readRemoteStatus")(function* (
     cwd: string,
     options?: GitRemoteStatusOptions,
@@ -1396,12 +1416,14 @@ export const make = Effect.gen(function* () {
           )
         : null;
 
+    const mergedHead = yield* isMergedHead(cwd, details.branch, pr);
+    const statusPr = pr === null ? null : (({ headSha: _headSha, ...status }) => status)(pr);
     return {
       hasUpstream: details.hasUpstream,
-      aheadCount: details.aheadCount,
+      aheadCount: mergedHead && !details.hasUpstream ? 0 : details.aheadCount,
       behindCount: details.behindCount,
-      aheadOfDefaultCount: details.aheadOfDefaultCount,
-      pr,
+      aheadOfDefaultCount: mergedHead ? 0 : details.aheadOfDefaultCount,
+      pr: statusPr,
     } satisfies VcsStatusRemoteResult;
   });
   const remoteStatusResultCache = yield* Cache.makeWith((cwd: string) => readRemoteStatus(cwd), {
@@ -3072,6 +3094,28 @@ export const make = Effect.gen(function* () {
             cwd: input.cwd,
             detail: "Cannot create a pull request from detached HEAD.",
           });
+        }
+
+        if (
+          !input.featureBranch &&
+          !initialStatus.hasWorkingTreeChanges &&
+          (wantsPush || wantsPr) &&
+          initialStatus.branch
+        ) {
+          const pr = yield* lookupStatusPr(input.cwd, {
+            branch: initialStatus.branch,
+            upstreamRef: initialStatus.upstreamRef,
+            defaultBranch: null,
+            isDefaultBranch: initialStatus.isDefaultBranch,
+          });
+          if (yield* isMergedHead(input.cwd, initialStatus.branch, pr)) {
+            return yield* new GitManagerError({
+              operation: "runStackedAction",
+              cwd: input.cwd,
+              detail:
+                "This branch head is already merged. Add new changes before pushing or creating a pull request.",
+            });
+          }
         }
 
         let branchStep: { status: "created" | "skipped_not_requested"; name?: string };
