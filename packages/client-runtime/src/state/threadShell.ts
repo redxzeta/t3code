@@ -25,6 +25,7 @@ import {
   threadKey,
   threadRefsEqual,
 } from "./entities.ts";
+import { isThreadWorking } from "./threadInbox.ts";
 
 const EMPTY_THREADS: ReadonlyArray<OrchestrationV2ThreadShell> = Object.freeze([]);
 const EMPTY_SCOPED_THREAD_REFS: ReadonlyArray<ScopedThreadRef> = Object.freeze([]);
@@ -181,6 +182,7 @@ function sameApartFromStreaming(
   if (
     previous.environmentId !== next.environmentId ||
     previous.pendingSubagentRequest !== next.pendingSubagentRequest ||
+    previous.hasWorkingSideChat !== next.hasWorkingSideChat ||
     !threadRuntimeIsActive(next.runtime)
   ) {
     return false;
@@ -219,6 +221,7 @@ export function createEnvironmentThreadShellAtoms(input: {
     environmentId: EnvironmentId,
     thread: OrchestrationV2ThreadShell,
     subagentRequests: ReadonlyMap<ThreadId, PendingSubagentRequest>,
+    workingSideChatParents: ReadonlySet<ThreadId>,
   ) => {
     let byEnvironment = scopedThreads.get(thread);
     if (byEnvironment === undefined) {
@@ -226,10 +229,11 @@ export function createEnvironmentThreadShellAtoms(input: {
       scopedThreads.set(thread, byEnvironment);
     }
     const request = subagentRequests.get(thread.id) ?? null;
-    const key = request === null ? environmentId : `${environmentId}:${request}`;
+    const hasWorkingSideChat = workingSideChatParents.has(thread.id);
+    const key = `${environmentId}:${request}:${hasWorkingSideChat}`;
     let value = byEnvironment.get(key);
     if (value === undefined) {
-      value = presentThreadShell(environmentId, thread, request);
+      value = { ...presentThreadShell(environmentId, thread, request), hasWorkingSideChat };
       byEnvironment.set(key, value);
     }
     return value;
@@ -343,6 +347,27 @@ export function createEnvironmentThreadShellAtoms(input: {
     }).pipe(Atom.withLabel(`environment-pending-subagent-requests:${environmentId}`));
   });
 
+  const workingSideChatParentsAtom = Atom.family((environmentId: EnvironmentId) =>
+    Atom.make((get): ReadonlySet<ThreadId> => {
+      const requests = get(pendingSubagentRequestsAtom(environmentId));
+      const parents = new Set<ThreadId>();
+      for (const [parentId, sideChats] of get(environmentSideChatsByParentAtom(environmentId))) {
+        if (
+          sideChats.some(
+            (thread) =>
+              thread.archivedAt === null &&
+              thread.deletedAt === null &&
+              isThreadWorking(
+                presentThreadShell(environmentId, thread, requests.get(thread.id) ?? null),
+              ),
+          )
+        )
+          parents.add(parentId);
+      }
+      return parents;
+    }).pipe(Atom.withLabel(`environment-working-side-chat-parents:${environmentId}`)),
+  );
+
   const environmentThreadRefsAtom = Atom.family((environmentId: EnvironmentId) => {
     let previous: ReadonlyArray<ScopedThreadRef> = [];
     return Atom.make((get) => {
@@ -411,6 +436,7 @@ export function createEnvironmentThreadShellAtoms(input: {
             ref.environmentId,
             source,
             get(pendingSubagentRequestsAtom(ref.environmentId)),
+            get(workingSideChatParentsAtom(ref.environmentId)),
           );
     }).pipe(Atom.withLabel(`environment-thread-shell:${key}`));
   });
@@ -473,7 +499,12 @@ export function createEnvironmentThreadShellAtoms(input: {
           pending.push(childKey);
           if (subagentRequest(thread) !== null || sideChatRequest(thread) !== null) {
             next.push(
-              scopedThread(environmentId, thread, get(pendingSubagentRequestsAtom(environmentId))),
+              scopedThread(
+                environmentId,
+                thread,
+                get(pendingSubagentRequestsAtom(environmentId)),
+                get(workingSideChatParentsAtom(environmentId)),
+              ),
             );
           }
         }
@@ -510,7 +541,12 @@ export function createEnvironmentThreadShellAtoms(input: {
       }
       const subagentRequests = get(pendingSubagentRequestsAtom(ref.environmentId));
       const next = sideChats.map((thread) =>
-        scopedThread(ref.environmentId, thread, subagentRequests),
+        scopedThread(
+          ref.environmentId,
+          thread,
+          subagentRequests,
+          get(workingSideChatParentsAtom(ref.environmentId)),
+        ),
       );
       if (
         previous.length === next.length &&
@@ -552,7 +588,14 @@ export function createEnvironmentThreadShellAtoms(input: {
           seen.add(key);
           const thread = threads.get(ref.threadId);
           if (thread !== undefined) {
-            next.push(scopedThread(ref.environmentId, thread, subagentRequests));
+            next.push(
+              scopedThread(
+                ref.environmentId,
+                thread,
+                subagentRequests,
+                get(workingSideChatParentsAtom(ref.environmentId)),
+              ),
+            );
           }
         }
       }
@@ -583,7 +626,14 @@ export function createEnvironmentThreadShellAtoms(input: {
     for (const environmentId of enabledEnvironmentIds(get(input.catalogValueAtom))) {
       const subagentRequests = get(pendingSubagentRequestsAtom(environmentId));
       for (const thread of get(environmentThreadsAtom(environmentId))) {
-        next.push(scopedThread(environmentId, thread, subagentRequests));
+        next.push(
+          scopedThread(
+            environmentId,
+            thread,
+            subagentRequests,
+            get(workingSideChatParentsAtom(environmentId)),
+          ),
+        );
       }
     }
     if (arrayElementsEqual(previousThreadShells, next)) {
@@ -648,7 +698,14 @@ export function createEnvironmentThreadShellAtoms(input: {
         ) {
           continue;
         }
-        next.push(scopedThread(environmentId, thread, subagentRequests));
+        next.push(
+          scopedThread(
+            environmentId,
+            thread,
+            subagentRequests,
+            get(workingSideChatParentsAtom(environmentId)),
+          ),
+        );
       }
     }
     if (arrayElementsEqual(previousNavigationShells, next)) return previousNavigationShells;

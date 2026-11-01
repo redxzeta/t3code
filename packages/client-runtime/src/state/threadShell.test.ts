@@ -251,6 +251,88 @@ describe("v2 thread shell lists", () => {
     registry.dispose();
   });
 
+  it("keeps a stopped parent Working until its side chat finishes or needs attention", () => {
+    const { registry, threads, snapshotAtom } = makeHarness();
+    const root = {
+      ...v2ThreadShell,
+      latestRunId: RunId.make("parent-run"),
+      status: "interrupted" as const,
+    };
+    const sideChat = {
+      ...root,
+      id: ThreadId.make("working-side-chat"),
+      latestRunId: RunId.make("side-chat-run"),
+      status: "running" as const,
+      lineage: {
+        ...root.lineage,
+        parentThreadId: root.id,
+        relationshipToParent: "fork" as const,
+        sideChat: true,
+      },
+    };
+    const ref = { environmentId, threadId: root.id };
+    const singleAtoms = [threads.threadShellAtom(ref), threads.quietThreadShellAtom(ref)];
+    const listAtoms = [
+      threads.quietThreadShellsAtom,
+      threads.navigationThreadShellsAtom,
+      threads.threadShellsAtom,
+      threads.threadShellsForProjectRefsAtom([{ environmentId, projectId: root.projectId }]),
+    ];
+    const disposers = [
+      ...singleAtoms.map((atom) => registry.mount(atom)),
+      ...listAtoms.map((atom) => registry.mount(atom)),
+    ];
+    const check = (
+      child: OrchestrationV2ThreadShell,
+      expected: boolean,
+      parent: OrchestrationV2ThreadShell = root,
+    ) => {
+      registry.set(snapshotAtom(environmentId), { ...v2ShellSnapshot, threads: [parent, child] });
+      const shells = [
+        ...singleAtoms.map((atom) => registry.get(atom)),
+        ...listAtoms.map((atom) => registry.get(atom).find((thread) => thread.id === root.id)),
+      ];
+      for (const shell of shells) expect(isThreadWorking(shell!), child.status).toBe(expected);
+      expect(registry.get(threads.navigationThreadShellsAtom).map((thread) => thread.id)).toEqual(
+        child.lineage.sideChat === true || child.archivedAt !== null
+          ? [root.id]
+          : [root.id, child.id],
+      );
+    };
+    try {
+      check(sideChat, true);
+      const waiting = {
+        ...sideChat,
+        status: "completed" as const,
+        activityRunStatus: null,
+        pendingBackgroundTasks: [
+          { taskId: "command-1", kind: "command" as const, awaited: true as const },
+        ],
+      };
+      check(waiting, true);
+      for (const kind of ["user_input", "command"] as const) {
+        const request = { id: RuntimeRequestId.make("attention"), kind, createdAt: v2Now };
+        check({ ...waiting, pendingRuntimeRequest: request }, false);
+        check(waiting, false, { ...root, pendingRuntimeRequest: request });
+      }
+      check(waiting, true);
+      check(waiting, false, { ...root, interactionMode: "plan", hasActionableProposedPlan: true });
+      check({ ...sideChat, status: "completed", activityRunStatus: null }, false);
+      check(sideChat, true);
+      check({ ...sideChat, archivedAt: v2Now }, false);
+      check({ ...sideChat, deletedAt: v2Now }, false);
+      check({ ...sideChat, lineage: { ...sideChat.lineage, sideChat: false } }, false);
+      const runningParent = { ...root, status: "running" as const };
+      check(sideChat, true, runningParent);
+      expect(registry.get(singleAtoms[1]!)?.hasWorkingSideChat).toBe(true);
+      check({ ...sideChat, status: "completed", activityRunStatus: null }, true, runningParent);
+      expect(registry.get(singleAtoms[1]!)?.hasWorkingSideChat).toBe(false);
+    } finally {
+      for (const dispose of disposers) dispose();
+      registry.dispose();
+    }
+  });
+
   it("brings a parent back from Working while a nested subagent waits for approval", () => {
     const { registry, threads, snapshotAtom } = makeHarness();
     const child = {
