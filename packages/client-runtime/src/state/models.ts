@@ -159,6 +159,7 @@ export interface EnvironmentThreadShell {
   readonly hasPendingApprovals: boolean;
   readonly hasPendingUserInput: boolean;
   readonly pendingSubagentRequest?: PendingSubagentRequest | null;
+  readonly hasWorkingSideChat?: boolean;
   /** Guest messages waiting for the owner to send or dismiss. */
   readonly pendingGuestMessageCount?: number;
   readonly hasActionableProposedPlan: boolean;

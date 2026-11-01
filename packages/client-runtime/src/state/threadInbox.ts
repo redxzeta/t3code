@@ -9,6 +9,7 @@ type WorkingThreadInput = Pick<
   | "hasPendingApprovals"
   | "hasPendingUserInput"
   | "pendingSubagentRequest"
+  | "hasWorkingSideChat"
   | "interactionMode"
   | "latestRun"
   | "runtime"
@@ -17,7 +18,6 @@ type WorkingThreadInput = Pick<
 export function isThreadWorking(thread: WorkingThreadInput): boolean {
   if (thread.hasPendingApprovals || thread.hasPendingUserInput) return false;
   if (thread.pendingSubagentRequest != null) return false;
-  if (!threadRuntimeIsActive(thread.runtime) && thread.runtime?.status !== "idle") return false;
   const run = thread.latestRun;
   const runSettled =
     run !== null &&
@@ -27,7 +27,13 @@ export function isThreadWorking(thread: WorkingThreadInput): boolean {
     run.status !== "running" &&
     run.status !== "waiting" &&
     thread.runtime?.activeRunId !== run.runId;
-  return !(thread.interactionMode === "plan" && thread.hasActionableProposedPlan && runSettled);
+  if (thread.interactionMode === "plan" && thread.hasActionableProposedPlan && runSettled)
+    return false;
+  return (
+    thread.hasWorkingSideChat === true ||
+    threadRuntimeIsActive(thread.runtime) ||
+    thread.runtime?.status === "idle"
+  );
 }
 
 type InboxThreadInput = Pick<
