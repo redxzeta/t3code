@@ -2245,6 +2245,9 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
       }
     }
 
+    if (includeDivergence && upstreamRef !== null) {
+      upstreamRef = yield* readCurrentUpstreamRef(cwd);
+    }
     const isDefaultBranch =
       refName !== null &&
       (refName === defaultBranch ||
@@ -3132,7 +3135,17 @@ export const makeGitVcsDriverCore = Effect.fn("makeGitVcsDriverCore")(function* 
           env: untracked.env,
         },
       );
-    let result = yield* readNumstat(mergeBase);
+    // Squash/rebase merges can leave identical trees with different commit ancestry.
+    const sameTree =
+      baseRef === null
+        ? null
+        : yield* executeGit(
+            "GitVcsDriver.readBranchChangeTotals.sameTree",
+            cwd,
+            ["diff", "--quiet", baseRef, "HEAD", "--"],
+            { allowNonZeroExit: true },
+          );
+    let result = yield* readNumstat(sameTree?.exitCode === 0 ? "HEAD" : mergeBase);
     if (result.exitCode !== 0 && mergeBase === "HEAD" && isUnbornHeadStderr(result.stderr)) {
       result = yield* readNumstat(yield* readEmptyTreeHash(cwd));
     }
