@@ -322,6 +322,11 @@ describe("v2 thread shell lists", () => {
       check({ ...sideChat, archivedAt: v2Now }, false);
       check({ ...sideChat, deletedAt: v2Now }, false);
       check({ ...sideChat, lineage: { ...sideChat.lineage, sideChat: false } }, false);
+      const runningParent = { ...root, status: "running" as const };
+      check(sideChat, true, runningParent);
+      expect(registry.get(singleAtoms[1]!)?.hasWorkingSideChat).toBe(true);
+      check({ ...sideChat, status: "completed", activityRunStatus: null }, true, runningParent);
+      expect(registry.get(singleAtoms[1]!)?.hasWorkingSideChat).toBe(false);
     } finally {
       for (const dispose of disposers) dispose();
       registry.dispose();
