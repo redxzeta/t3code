@@ -1,0 +1,444 @@
+{
+  "schema_version": 1,
+  "state": "BLOCKED_TECHNICAL",
+  "trial": "V4 local CLI retry, issue 28949",
+  "conclusion": "F0 readiness reproduced; sticky F1 issue not reproduced by sealed offline provider contract. No coding arms launched or winner selected.",
+  "preflight": {
+    "host": "sableoracle",
+    "fork": "redxzeta/t3code",
+    "issue": 28949,
+    "issue_state": "OPEN",
+    "related_pr": 22944,
+    "related_pr_read": "description only; patch not read",
+    "preserved_pr": 6,
+    "preserved_pr_head": "f15c59f0d430a6ffa57708bc7be19af054c934b4",
+    "cli": "0.166.0",
+    "auth": "ChatGPT installed auth; no credential values recorded",
+    "preflight": "PREFLIGHT_OK",
+    "preflight_coding_work": false,
+    "afterimage_version": "3.2.16",
+    "afterimage_sha256": "001954957f2c55566cf14a23fd27460ca5affbd5220bdbd57dd3e1d353315d94",
+    "gitnexus_version": "1.6.12",
+    "gitnexus_cli_sha256": "e2c96d62b26a1898e536457377f7b73c539b080c7e8c316869ffc6a790003eb4",
+    "gitnexus_executable_source": "existing local installed package, no prior indexes reused",
+    "parent_checkout_clean": true,
+    "indexing_started": false,
+    "coding_started": false
+  },
+  "protocol": {
+    "source_sha": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+    "source_tree": "de3f0bc5eab2ae411eb87c31921ed20d3c92d356",
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "harness": "local codex exec 0.166.0; not native T3 top-level sessions",
+    "coding_seconds": 1080,
+    "index_seconds": 720,
+    "index_rss_limit_gib": 12,
+    "order": ["afterimage", "source", "gitnexus"],
+    "prompt_sha256": "cb659d8378abd453f0cdd6648d37afd45231d8cbcbc8d26a4a8c4f2e2f60a00e",
+    "scores": {
+      "correctness": 40,
+      "regression": 25,
+      "credential_isolation": 20,
+      "simplicity": 15
+    },
+    "disqualifiers": ["serious correctness regression", "credential isolation regression"],
+    "oracle": "Must execute actual adapter/service logic with fake providers and MCP registry; base must fail before coding. No regex-only oracle accepted.",
+    "network": "model API and GitHub coordinator operations only; offline provider tests",
+    "no_merge": true,
+    "index_gate": "both indexed before all coding; structural queries twice fresh-process; hashes+mtime unchanged; no reindex",
+    "status": "REVIEWED_BEFORE_DATA",
+    "expert_review_sha256": "f645e0d6f2f3fa05a17a2ce8902ec4801ad78c8696abb78ffe96215946b12e78",
+    "adjustments": [
+      "Separate fork-return F0 readiness from first-prompt F1 symptom; do not manufacture sticky F1 behavior",
+      "Effective catalog identity invocation, not mcp.add count; harmless idempotent calls allowed",
+      "Fresh HOME/XDG/tool stores; report coverage gaps",
+      "Freeze oracle before coding; no network/provider tests; unexpected I/O fails",
+      "One expert CLI session reviewed all four perspectives; not four independent humans"
+    ],
+    "oracle_budget_seconds": 720
+  },
+  "worktrees": {
+    "source": {
+      "worktree": "<WORKTREE_SOURCE>",
+      "branch": "bench/v4-28949-20261102T051513Z-source",
+      "sha": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+      "tree": "de3f0bc5eab2ae411eb87c31921ed20d3c92d356",
+      "status": "",
+      "ignored_stores_initial": "absent"
+    },
+    "afterimage": {
+      "worktree": "<WORKTREE_AFTERIMAGE>",
+      "branch": "bench/v4-28949-20261102T051513Z-afterimage",
+      "sha": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+      "tree": "de3f0bc5eab2ae411eb87c31921ed20d3c92d356",
+      "status": "",
+      "ignored_stores_initial": "absent"
+    },
+    "gitnexus": {
+      "worktree": "<WORKTREE_GITNEXUS>",
+      "branch": "bench/v4-28949-20261102T051513Z-gitnexus",
+      "sha": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+      "tree": "de3f0bc5eab2ae411eb87c31921ed20d3c92d356",
+      "status": "",
+      "ignored_stores_initial": "absent"
+    },
+    "oracle": {
+      "worktree": "<WORKTREE_ORACLE>",
+      "branch": "bench/v4-28949-20261102T051513Z-oracle",
+      "sha": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+      "tree": "de3f0bc5eab2ae411eb87c31921ed20d3c92d356",
+      "status": "",
+      "ignored_stores_initial": "absent"
+    },
+    "report": {
+      "worktree": "<WORKTREE_REPORT>",
+      "branch": "bench/v4-28949-20261102T051513Z-report",
+      "sha": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+      "tree": "de3f0bc5eab2ae411eb87c31921ed20d3c92d356",
+      "status": "",
+      "ignored_stores_initial": "absent"
+    }
+  },
+  "tree_manifests": {
+    "source": {
+      "tracked_tree_manifest_sha256": "15f287a32955d957d187fe022200d49ae4d4beb65efb3393232a2d6070858c1d",
+      "tracked_entries": 29048,
+      "status_after_setup": ""
+    },
+    "afterimage": {
+      "tracked_tree_manifest_sha256": "15f287a32955d957d187fe022200d49ae4d4beb65efb3393232a2d6070858c1d",
+      "tracked_entries": 29048,
+      "status_after_setup": ""
+    },
+    "gitnexus": {
+      "tracked_tree_manifest_sha256": "15f287a32955d957d187fe022200d49ae4d4beb65efb3393232a2d6070858c1d",
+      "tracked_entries": 29048,
+      "status_after_setup": ""
+    }
+  },
+  "dependency_setup": {
+    "source": {
+      "exit": 0,
+      "wall_s": 1.8739343341439962,
+      "tracked_diff": ""
+    },
+    "afterimage": {
+      "exit": 0,
+      "wall_s": 1.8763986721169204,
+      "tracked_diff": ""
+    },
+    "gitnexus": {
+      "exit": 0,
+      "wall_s": 1.824416495859623,
+      "tracked_diff": ""
+    },
+    "report": {
+      "exit": 0,
+      "wall_s": 1.7218850718345493,
+      "tracked_diff": ""
+    }
+  },
+  "index_results": {
+    "afterimage": {
+      "exit": 0,
+      "wall_s": 161.5911663430743,
+      "command": ["<AFTERIMAGE_BIN>", "-r", "<WORKTREE_AFTERIMAGE>", "index", "--ast-only"]
+    },
+    "gitnexus": {
+      "exit": 0,
+      "wall_s": 204.67139161913656,
+      "command": [
+        "node",
+        "<GITNEXUS_PACKAGE>/dist/cli/index.js",
+        "analyze",
+        "<WORKTREE_GITNEXUS>",
+        "--index-only",
+        "--skip-fts",
+        "--no-parse-cache",
+        "--workers",
+        "4"
+      ]
+    }
+  },
+  "index_resource_usage": {
+    "afterimage": {
+      "User time (seconds)": "366.32",
+      "System time (seconds)": "2.40",
+      "Maximum resident set size (kbytes)": "1306984",
+      "Exit status": "0"
+    },
+    "gitnexus": {
+      "User time (seconds)": "575.17",
+      "System time (seconds)": "38.89",
+      "Maximum resident set size (kbytes)": "4136496",
+      "Exit status": "0"
+    }
+  },
+  "index_gate_first": {
+    "afterimage": {
+      "runs": [
+        {
+          "rep": 0,
+          "query": "MATCH (n:Symbol) RETURN count(n)",
+          "exit": 0,
+          "wall_s": 3.8237308950629085,
+          "stdout": "166573\n",
+          "stderr": "[auto-watch] Watcher started (log: <WORKTREE_AFTERIMAGE>/.infigraph/watch.log)\n"
+        },
+        {
+          "rep": 0,
+          "query": "MATCH (n:Symbol) WHERE n.file CONTAINS 'provider-opencode' RETURN n.name, n.file LIMIT 15",
+          "exit": 0,
+          "wall_s": 3.634143815143034,
+          "stdout": "\"extends\" | packages/provider-opencode/tsconfig.json\n\"compilerOptions\" | packages/provider-opencode/tsconfig.json\n\"include\" | packages/provider-opencode/tsconfig.json\n\"private\" | packages/provider-opencode/package.json\n\"exports\" | packages/provider-opencode/package.json\n\"dependencies\" | packages/provider-opencode/package.json\n\"devDependencies\" | packages/provider-opencode/package.json\n\"scripts\" | packages/provider-opencode/package.json\n\"type\" | packages/provider-opencode/package.json\n\"name\" | packages/provider-opencode/package.json\nopenCodeClient | packages/provider-opencode/src/client.ts\nOpenCodeSettings | packages/provider-opencode/src/settings.ts\neffectiveServerPassword | packages/provider-opencode/src/server/textGeneration.test.ts\nresult | packages/provider-opencode/src/server/textGeneration.test.ts\nlayerOpenCodeTextGenerationTest | packages/provider-opencode/src/server/textGeneration.test.ts\n",
+          "stderr": ""
+        },
+        {
+          "rep": 1,
+          "query": "MATCH (n:Symbol) RETURN count(n)",
+          "exit": 0,
+          "wall_s": 3.527630761032924,
+          "stdout": "166573\n",
+          "stderr": ""
+        },
+        {
+          "rep": 1,
+          "query": "MATCH (n:Symbol) WHERE n.file CONTAINS 'provider-opencode' RETURN n.name, n.file LIMIT 15",
+          "exit": 0,
+          "wall_s": 3.5490248878486454,
+          "stdout": "makeOpenCodeTextGeneration | packages/provider-opencode/src/server/textGeneration.ts\nresponseParts | packages/provider-opencode/src/server/textGeneration.ts\nrawOutput | packages/provider-opencode/src/server/textGeneration.ts\nmessage | packages/provider-opencode/src/server/textGeneration.ts\nresult | packages/provider-opencode/src/server/textGeneration.ts\nOpenCodeTextGenerationOperation | packages/provider-opencode/src/server/textGeneration.ts\nmessage | packages/provider-opencode/src/server/textGeneration.ts\nparsedModel | packages/provider-opencode/src/server/textGeneration.ts\nselectedVariant | packages/provider-opencode/src/server/textGeneration.ts\nmessage | packages/provider-opencode/src/server/textGeneration.ts\nname | packages/provider-opencode/src/server/textGeneration.ts\nfileParts | packages/provider-opencode/src/server/textGeneration.ts\nproviderError | packages/provider-opencode/src/server/textGeneration.ts\nserverOwner | packages/provider-opencode/src/server/textGeneration.ts\nhost | packages/provider-opencode/src/server/textGeneration.ts\n",
+          "stderr": ""
+        }
+      ],
+      "mutations": [
+        "<WORKTREE_AFTERIMAGE>/.infigraph/watch.lock",
+        "<WORKTREE_AFTERIMAGE>/.infigraph/watch.log"
+      ],
+      "immutable": false,
+      "deterministic": false,
+      "all_queries_pass": true,
+      "bytes": 98677778
+    },
+    "gitnexus": {
+      "runs": [
+        {
+          "rep": 0,
+          "query": "MATCH (n:Function) RETURN count(n)",
+          "exit": 0,
+          "wall_s": 0.5512878550216556,
+          "stdout": "{\n  \"markdown\": \"| COUNT(n._ID) |\\n| --- |\\n| 44142 |\",\n  \"row_count\": 1\n}\n",
+          "stderr": "\n  GitNexus Cypher (1.6.12)\n{\"level\":40,\"time\":1793597143628,\"name\":\"gitnexus\",\"msg\":\"GitNexus: FTS extension unavailable; continuing without FTS features. load-only policy (no install attempted); LOAD fts failed: Binder exception: Extension: fts is an official extension and has not been installed. You can install it by: install fts.\"}\n"
+        },
+        {
+          "rep": 0,
+          "query": "MATCH (n:Function) WHERE n.filePath CONTAINS 'provider-opencode' RETURN n.name, n.filePath LIMIT 15",
+          "exit": 0,
+          "wall_s": 0.5044926898553967,
+          "stdout": "{\n  \"markdown\": \"| n.name | n.filePath |\\n| --- | --- |\\n| makeHealthClient | packages/provider-opencode/src/server/OpenCodeRuntime.environment.test.ts |\\n| layerServerReplying | packages/provider-opencode/src/server/openCode2Catalog.test.ts |\\n| readCatalog | packages/provider-opencode/src/server/openCode2Catalog.test.ts |\\n| orElse | packages/provider-opencode/src/server/v2/textGeneration.ts |\\n| run | packages/provider-opencode/src/server/v2/textGeneration.ts |\\n| isExecutionEnd | packages/provider-opencode/src/server/v2/OpenCode2Client.ts |\\n| orElse | packages/provider-opencode/src/server/v2/OpenCode2Client.ts |\\n| basicAuthorization | packages/provider-opencode/src/server/v2/OpenCode2Client.ts |\\n| paginate | packages/provider-opencode/src/server/v2/OpenCode2Client.ts |\\n| startOpenCodeServerProcess | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| connectToOpenCodeServer | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| runOpenCodeCommand | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| createOpenCodeSdkClient | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| create | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| abort | packages/provider-opencode/src/server/textGeneration.test.ts |\",\n  \"row_count\": 15\n}\n",
+          "stderr": "\n  GitNexus Cypher (1.6.12)\n{\"level\":40,\"time\":1793597144127,\"name\":\"gitnexus\",\"msg\":\"GitNexus: FTS extension unavailable; continuing without FTS features. load-only policy (no install attempted); LOAD fts failed: Binder exception: Extension: fts is an official extension and has not been installed. You can install it by: install fts.\"}\n"
+        },
+        {
+          "rep": 1,
+          "query": "MATCH (n:Function) RETURN count(n)",
+          "exit": 0,
+          "wall_s": 0.4941235438454896,
+          "stdout": "{\n  \"markdown\": \"| COUNT(n._ID) |\\n| --- |\\n| 44142 |\",\n  \"row_count\": 1\n}\n",
+          "stderr": "\n  GitNexus Cypher (1.6.12)\n{\"level\":40,\"time\":1793597144635,\"name\":\"gitnexus\",\"msg\":\"GitNexus: FTS extension unavailable; continuing without FTS features. load-only policy (no install attempted); LOAD fts failed: Binder exception: Extension: fts is an official extension and has not been installed. You can install it by: install fts.\"}\n"
+        },
+        {
+          "rep": 1,
+          "query": "MATCH (n:Function) WHERE n.filePath CONTAINS 'provider-opencode' RETURN n.name, n.filePath LIMIT 15",
+          "exit": 0,
+          "wall_s": 0.5002268189564347,
+          "stdout": "{\n  \"markdown\": \"| n.name | n.filePath |\\n| --- | --- |\\n| makeHealthClient | packages/provider-opencode/src/server/OpenCodeRuntime.environment.test.ts |\\n| layerServerReplying | packages/provider-opencode/src/server/openCode2Catalog.test.ts |\\n| readCatalog | packages/provider-opencode/src/server/openCode2Catalog.test.ts |\\n| orElse | packages/provider-opencode/src/server/v2/textGeneration.ts |\\n| run | packages/provider-opencode/src/server/v2/textGeneration.ts |\\n| isExecutionEnd | packages/provider-opencode/src/server/v2/OpenCode2Client.ts |\\n| orElse | packages/provider-opencode/src/server/v2/OpenCode2Client.ts |\\n| basicAuthorization | packages/provider-opencode/src/server/v2/OpenCode2Client.ts |\\n| paginate | packages/provider-opencode/src/server/v2/OpenCode2Client.ts |\\n| startOpenCodeServerProcess | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| connectToOpenCodeServer | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| runOpenCodeCommand | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| createOpenCodeSdkClient | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| create | packages/provider-opencode/src/server/textGeneration.test.ts |\\n| abort | packages/provider-opencode/src/server/textGeneration.test.ts |\",\n  \"row_count\": 15\n}\n",
+          "stderr": "\n  GitNexus Cypher (1.6.12)\n{\"level\":40,\"time\":1793597145129,\"name\":\"gitnexus\",\"msg\":\"GitNexus: FTS extension unavailable; continuing without FTS features. load-only policy (no install attempted); LOAD fts failed: Binder exception: Extension: fts is an official extension and has not been installed. You can install it by: install fts.\"}\n"
+        }
+      ],
+      "mutations": [],
+      "immutable": true,
+      "deterministic": true,
+      "all_queries_pass": true,
+      "bytes": 1547804268
+    }
+  },
+  "index_gate_corrected": {
+    "afterimage": {
+      "runs": [
+        {
+          "rep": 0,
+          "query": "MATCH (n:Symbol) RETURN count(n)",
+          "exit": 0,
+          "wall_s": 3.557848521042615,
+          "stdout": "166573\n",
+          "stderr": ""
+        },
+        {
+          "rep": 0,
+          "query": "MATCH (n:Symbol) WHERE n.file CONTAINS 'provider-opencode' RETURN n.name, n.file ORDER BY n.file, n.name, n.id LIMIT 15",
+          "exit": 0,
+          "wall_s": 3.6326244950760156,
+          "stdout": "\"dependencies\" | packages/provider-opencode/package.json\n\"devDependencies\" | packages/provider-opencode/package.json\n\"exports\" | packages/provider-opencode/package.json\n\"name\" | packages/provider-opencode/package.json\n\"private\" | packages/provider-opencode/package.json\n\"scripts\" | packages/provider-opencode/package.json\n\"type\" | packages/provider-opencode/package.json\nopenCodeClient | packages/provider-opencode/src/client.ts\nattachment | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts\nparts | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts\nerror | packages/provider-opencode/src/server/OpenCodeRuntime.environment.test.ts\nmakeHealthClient | packages/provider-opencode/src/server/OpenCodeRuntime.environment.test.ts\naborted | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts\nclient | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts\ncommandRequest | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts\n",
+          "stderr": ""
+        },
+        {
+          "rep": 1,
+          "query": "MATCH (n:Symbol) RETURN count(n)",
+          "exit": 0,
+          "wall_s": 3.583747021155432,
+          "stdout": "166573\n",
+          "stderr": ""
+        },
+        {
+          "rep": 1,
+          "query": "MATCH (n:Symbol) WHERE n.file CONTAINS 'provider-opencode' RETURN n.name, n.file ORDER BY n.file, n.name, n.id LIMIT 15",
+          "exit": 0,
+          "wall_s": 3.625497594010085,
+          "stdout": "\"dependencies\" | packages/provider-opencode/package.json\n\"devDependencies\" | packages/provider-opencode/package.json\n\"exports\" | packages/provider-opencode/package.json\n\"name\" | packages/provider-opencode/package.json\n\"private\" | packages/provider-opencode/package.json\n\"scripts\" | packages/provider-opencode/package.json\n\"type\" | packages/provider-opencode/package.json\nopenCodeClient | packages/provider-opencode/src/client.ts\nattachment | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts\nparts | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts\nerror | packages/provider-opencode/src/server/OpenCodeRuntime.environment.test.ts\nmakeHealthClient | packages/provider-opencode/src/server/OpenCodeRuntime.environment.test.ts\naborted | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts\nclient | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts\ncommandRequest | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts\n",
+          "stderr": ""
+        }
+      ],
+      "mutations": [],
+      "immutable": true,
+      "deterministic": true,
+      "all_queries_pass": true,
+      "bytes": 98677778
+    },
+    "gitnexus": {
+      "runs": [
+        {
+          "rep": 0,
+          "query": "MATCH (n:Function) RETURN count(n)",
+          "exit": 0,
+          "wall_s": 0.5007246739696711,
+          "stdout": "{\n  \"markdown\": \"| COUNT(n._ID) |\\n| --- |\\n| 44142 |\",\n  \"row_count\": 1\n}\n",
+          "stderr": "\n  GitNexus Cypher (1.6.12)\n{\"level\":40,\"time\":1793597199260,\"name\":\"gitnexus\",\"msg\":\"GitNexus: FTS extension unavailable; continuing without FTS features. load-only policy (no install attempted); LOAD fts failed: Binder exception: Extension: fts is an official extension and has not been installed. You can install it by: install fts.\"}\n"
+        },
+        {
+          "rep": 0,
+          "query": "MATCH (n:Function) WHERE n.filePath CONTAINS 'provider-opencode' RETURN n.name, n.filePath ORDER BY n.filePath, n.name, n.id LIMIT 15",
+          "exit": 0,
+          "wall_s": 0.5259271829854697,
+          "stdout": "{\n  \"markdown\": \"| n.name | n.filePath |\\n| --- | --- |\\n| attachment | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts |\\n| resolveAttachmentPath | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts |\\n| resolveAttachmentPath | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts |\\n| makeHealthClient | packages/provider-opencode/src/server/OpenCodeRuntime.environment.test.ts |\\n| agents | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| list | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| preconnect | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| preconnect | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| skills | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| catch | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| classifyStartupExit | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| connectToOpenCodeServer | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| createOpenCodeSdkClient | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| encodeJsonStringForDiagnostics | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| ensureRuntimeError | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\",\n  \"row_count\": 15\n}\n",
+          "stderr": "\n  GitNexus Cypher (1.6.12)\n{\"level\":40,\"time\":1793597199768,\"name\":\"gitnexus\",\"msg\":\"GitNexus: FTS extension unavailable; continuing without FTS features. load-only policy (no install attempted); LOAD fts failed: Binder exception: Extension: fts is an official extension and has not been installed. You can install it by: install fts.\"}\n"
+        },
+        {
+          "rep": 1,
+          "query": "MATCH (n:Function) RETURN count(n)",
+          "exit": 0,
+          "wall_s": 0.496687832986936,
+          "stdout": "{\n  \"markdown\": \"| COUNT(n._ID) |\\n| --- |\\n| 44142 |\",\n  \"row_count\": 1\n}\n",
+          "stderr": "\n  GitNexus Cypher (1.6.12)\n{\"level\":40,\"time\":1793597200280,\"name\":\"gitnexus\",\"msg\":\"GitNexus: FTS extension unavailable; continuing without FTS features. load-only policy (no install attempted); LOAD fts failed: Binder exception: Extension: fts is an official extension and has not been installed. You can install it by: install fts.\"}\n"
+        },
+        {
+          "rep": 1,
+          "query": "MATCH (n:Function) WHERE n.filePath CONTAINS 'provider-opencode' RETURN n.name, n.filePath ORDER BY n.filePath, n.name, n.id LIMIT 15",
+          "exit": 0,
+          "wall_s": 0.5202678211499006,
+          "stdout": "{\n  \"markdown\": \"| n.name | n.filePath |\\n| --- | --- |\\n| attachment | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts |\\n| resolveAttachmentPath | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts |\\n| resolveAttachmentPath | packages/provider-opencode/src/server/OpenCodeRuntime.cliParsers.test.ts |\\n| makeHealthClient | packages/provider-opencode/src/server/OpenCodeRuntime.environment.test.ts |\\n| agents | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| list | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| preconnect | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| preconnect | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| skills | packages/provider-opencode/src/server/OpenCodeRuntime.inventory.test.ts |\\n| catch | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| classifyStartupExit | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| connectToOpenCodeServer | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| createOpenCodeSdkClient | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| encodeJsonStringForDiagnostics | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\\n| ensureRuntimeError | packages/provider-opencode/src/server/OpenCodeRuntime.ts |\",\n  \"row_count\": 15\n}\n",
+          "stderr": "\n  GitNexus Cypher (1.6.12)\n{\"level\":40,\"time\":1793597200779,\"name\":\"gitnexus\",\"msg\":\"GitNexus: FTS extension unavailable; continuing without FTS features. load-only policy (no install attempted); LOAD fts failed: Binder exception: Extension: fts is an official extension and has not been installed. You can install it by: install fts.\"}\n"
+        }
+      ],
+      "mutations": [],
+      "immutable": true,
+      "deterministic": true,
+      "all_queries_pass": true,
+      "bytes": 1547804268
+    }
+  },
+  "gitnexus_package": {
+    "dist_file_count": 2048,
+    "dist_manifest_content_sha256": "c39d3cb97bfa694f5493145f9fdc0705935e69c03a8205f68bc0bc810fb30f90"
+  },
+  "expert_review": "**Preregistration verdict: conditionally ready.** Freeze the catalog observation point and validate the hidden oracle against the frozen base before any coding arm starts. Otherwise, the benchmark could reward a new lifecycle requirement without reproducing the reported loss of tools.\n\nI inspected only current-checkout source and tests. `HEAD` is `abf1b8f2e14d2edeeb1e4393984657906dfff7ed`. I did not read prior reports, sessions, history, other worktrees, or the upstream patch. No indexing, source writes, implementation, or oracle execution occurred.\n\n**1. Senior TypeScript/OpenCode adapter lifecycle engineer**\n\n- **Concern: credential issuance, registration, permissions, and usable tools are different milestones.** The session manager already attaches the target thread before calling the adapter’s fork. The adapter writes fork permissions, while MCP registration currently occurs during turn preparation. A test asserting only “child credential exists” or “`mcp.add` was called” cannot establish usable tools.  \n  **Minimal adjustment:** require an effective child catalog plus a successful identity invocation through that catalog, with both observations attributed to the child credential.\n\n- **Concern: “first catalog at fork” is ambiguous.** Successful `forkThread` return precedes turn preparation on this base. An immediate catalog observation can therefore fail even though the first subsequent prompt registers MCP successfully. Ordinary thread creation also defers registration.  \n  **Minimal adjustment:** preregister two distinct checkpoints: **F0**, immediately after successful fork return and before any child turn; **F1**, the catalog presented to the first child prompt. Explicitly declare whether F0 readiness is a required product contract. Keep F1 mandatory for the reported model-facing symptom; do not substitute an F0 failure for an F1 reproduction.\n\n- **Concern: forks, delegated subagents, and portable context fallbacks are different paths.** A scenario can accidentally exercise ordinary thread creation instead of a native fork.  \n  **Minimal adjustment:** require evidence that the actual native `session.fork` endpoint ran, the child has a distinct native identity, and its T3 lineage is `fork`. Separately retain an ordinary-thread control.\n\n**Uncertainty:** inspected source alone does not establish why tools remain absent at the first prompt after restart. The existing code already prepares target credentials and attempts registration each turn. Provider-side inheritance or catalog behavior remains unverified.\n\n**2. Structural graph completeness/cache engineer**\n\n- **Concern: inspecting only `apps/server` misses the implementation.** The v2 implementation lives in `packages/provider-opencode`; server-side files with similar names are largely test infrastructure. Effect services, package subpath imports, runtime wrappers, and generation selection also complicate call edges.  \n  **Minimal adjustment:** give both graph arms the same source manifest and exclusion rules. Record coverage of the boundary identities below, unresolved imports, unsupported syntax, and missing edges before coding. Do not silently repair one graph by feeding it this review’s answer path.\n\n- **Concern: a completed indexing process does not prove a complete or fresh graph.** A fresh `HOME` alone may leave shared caches through XDG directories, tool-specific state, or repository registration.  \n  **Minimal adjustment:** pin tool/parser versions and configuration; isolate HOME, XDG locations, index storage, and tool-specific caches. Record source-manifest hash, index completion status, graph counts, warnings, and repository identity. Finish both indexes before the first coding session.\n\n- **Concern: repeated queries can conceal stale or nondeterministic results.** “Structural graph” also does not automatically exclude semantic or full-text retrieval.  \n  **Minimal adjustment:** freeze exact tool-native query payloads and their semantic intent before indexing. Execute the same ordered suite twice against each unchanged index. Preserve raw responses and canonical result digests; record timing separately. Use only structural operations such as exact symbol lookup, references, callers/callees, imports, and bounded graph traversal. Prohibit BM25, full-text, embedding retrieval, and automatic search fallback.\n\n**Uncertainty:** I have not inspected or run either graph product. Their supported edge types, cache controls, and exact query APIs must be recorded, not assumed equivalent. A missing structural operation should be reported as missing coverage.\n\n**3. Benchmark scientist**\n\n- **Concern: three single runs cannot distinguish treatment effects from model variance or order effects.**  \n  **Minimal adjustment:** describe this as an exploratory three-run comparison. Draw one permutation uniformly from the six possible arm orders and record the realized order before indexing or coding. Report per-arm outcomes; avoid causal superiority claims.\n\n- **Concern: “no search” needs an operational definition.** It could mean graph retrieval only, or also prohibit `rg` and ordinary source navigation. Those produce materially different treatments.  \n  **Minimal adjustment:** freeze one shared source-navigation policy. If the restriction concerns graph retrieval, explicitly allow identical source-file navigation in all arms while forbidding graph search fallbacks. If literal across all retrieval, prohibit textual search in all three arms and specify permitted file navigation.\n\n- **Concern: unequal preparation, prompts, tool budgets, or failure handling can dominate the result.**  \n  **Minimal adjustment:** freeze the issue prompt, model/harness settings, dependency environment, graph instructions, query limits, and 1080-second clock boundaries. Start each clock when the coding session can first act after completed indexing. At timeout, evaluate the resulting source snapshot without repair. Preregister infrastructure-failure and rerun rules.\n\n- **Concern: hidden tests can become post hoc judging.**  \n  **Minimal adjustment:** seal and hash the oracle, fixture, case weights, and pass criteria before coding. Keep them outside every indexed/coding checkout. Run the identical oracle on each completed arm in a fresh evaluation environment. Publish all case outcomes and indexing/query costs.\n\n**Uncertainty:** the realized random order and baseline oracle failures have not been established here. They remain prerequisites, not completed preregistration evidence.\n\n**4. Reliability/security engineer**\n\n- **Concern: offline tests can accidentally launch a provider or bind a server.** The existing full OpenCode replay harness also sets `external: true`, which intentionally skips MCP registration.  \n  **Minimal adjustment:** inject a fake `OpenCode2Server` connection with `external: false`, backed by an in-process HTTP transport. Make unexpected network, socket binding, subprocess/provider launch, and external credential access fail immediately.\n\n- **Concern: tools can appear while carrying the parent’s authority.** Shared-location registration makes catalog presence alone insufficient.  \n  **Minimal adjustment:** use distinct parent/child credentials and assert resolved environment, thread, provider instance, credential namespace, and capabilities. Invoke a synthetic identity tool through the selected catalog entry. Check parent isolation after fork, failed registration, retry, and child cleanup.\n\n- **Concern: restart can accidentally retain the state being tested.** Registration failures can also look successful if the fake returns tools regardless of registration.  \n  **Minimal adjustment:** specify restart state explicitly: preserve native sessions and durable T3 records; recreate adapter/service scopes and credential state. Exercise both retained provider registrations containing stale credentials and cleared provider registrations. Require a captured failure signal and truthful availability, followed by recovery without duplicates.\n\n**Uncertainty:** offline fakes establish behavior under their frozen provider contract. They cannot independently prove the behavior of an uninspected OpenCode release.\n\n**Proposed offline hidden oracle**\n\nUse the actual v2 adapter through the actual `ProviderSessionManagerV2` wrapper. Do not replace its `forkThread`, `resumeThread`, or `startTurn` methods with mocks.\n\nConstruct an in-process fake provider with:\n\n- Native sessions containing independent IDs, location, permissions, model, instructions, and history.\n- A location-scoped runtime MCP registry updated only by observed registration/removal requests.\n- Native fork behavior that copies session state but does not fabricate a child-specific MCP registration.\n- An effective catalog computed from registered tools and session permissions using the frozen last-match rule semantics.\n- A synthetic `identity` tool whose invocation authenticates the registered bearer credential and returns its resolved scope.\n- Prompt handling that snapshots the effective catalog before emitting deterministic completion events.\n\nThe fake must not call production preparation helpers or infer desired tools from `appThreadId`.\n\n| Case | Required assertions |\n|---|---|\n| Ordinary control | Create a normal thread through the real service. Its first prompt receives its own identity tool and invocation scope. |\n| Native fork, F0 | Warm a parent through an ordinary turn. Fork through the real service. Immediately after successful return, inspect the child catalog without starting a turn or triggering preparation. Under an explicitly adopted F0 contract, require the child’s own usable identity tool. |\n| Native fork, F1 | Independently run the child’s first turn. At prompt acceptance, require its own usable identity tool; exclude the parent’s T3 namespace. Record actual registration and permission state supporting that result. |\n| Parent isolation | Parent catalog and identity invocation remain correct after fork, child turn, child registration failure, retry, and unload. Child authority never resolves as parent authority. |\n| Resume/idempotence | Repeated service-level resume and subsequent turns preserve exactly one effective child identity entry and correct scope. Permit harmless repeated registration requests; do not demand a particular call count. |\n| Restart | Reconstruct scopes from preserved records, with no test-side credential preinstallation. Test retained stale provider registrations and empty provider registrations separately. Require correct scope at the declared catalog checkpoint and first prompt; repeat reconstruction to detect accumulated state. |\n| Registration failure | Reject child registration deterministically. Require an observable error/warning, no false usable child entry, and no instructions claiming availability. After removing the fault, require recovery on the next supported lifecycle opportunity. |\n\nUse same-directory parent/child sessions for the central isolation case. Add a destination-directory variant and a long thread ID as secondary coverage.\n\n**Frozen-base failure requirement:** F0 is expected to fail by source inspection: fork writes rules but does not perform turn-time MCP registration. That is an inference, not an executed result. F1 failure is **not established**. Before coding, the organizer must demonstrate a symptom-level central failure on the frozen base using provider behavior justified independently of the anticipated fix. If only F0 fails, label the task as eager fork-catalog readiness, or revise the reproduction before freezing it. Do not manufacture an F1 failure by teaching the fake to reject the base’s implementation.\n\nOrdinary controls and isolation guards should pass on the base. Central defect assertions must fail for the intended missing capability—not transport decoding, fixture incompleteness, timeouts, or setup errors.\n\n**Practical fixture construction and source boundaries**\n\nStart from the existing in-memory persistence and service-layer construction patterns, replacing the fake adapter with the real v2 adapter. Share one `McpProviderSessions` layer between the manager and adapter. Supply an auth-aware fake `McpSessionRegistry` implementing issue, resolve, touch, and revocation; never manually seed child credentials.\n\nUse `Deferred`/`Queue` milestones for prompt acceptance and event completion. If entering through orchestration commands, drain the effect worker. Use test-clock advancement only for explicit expiry scenarios; no sleeps or polling.\n\n| Boundary identity | Current source |\n|---|---|\n| Generation selection | [selectOpenCodeRuntimeAdapter](<PRIVATE_PATH>) |\n| Native fork and resume | [v2 adapter runtime](<PRIVATE_PATH>) |\n| MCP preparation and availability | [prepareTurn](<PRIVATE_PATH>) |\n| Names and permission ordering | [t3McpServerName / mcpRules](<PRIVATE_PATH>) |\n| Credential preparation and runtime wrapping | [ProviderSessionManager](<PRIVATE_PATH>) |\n| Native-fork service entry | [ProviderTurnStartService](<PRIVATE_PATH>) |\n| Credential storage and authentication contracts | [McpProviderSessions](<PRIVATE_PATH>), [McpSessionRegistry](<PRIVATE_PATH>) |\n| In-process transport starting point | [OpenCode2 adapter testkit](<PRIVATE_PATH>) |\n\nThe existing transcript helpers are useful for wire shapes, but a stateful fake catalog is necessary to test usability rather than mirror expected adapter calls.",
+  "oracle": {
+    "result": "Hidden offline oracle, authored and executed only in this task-owned worktree.\n\nFrozen base: abf1b8f2e14d2edeeb1e4393984657906dfff7ed (HEAD). Tracked working tree is clean; no implementation edits, commits, pushes, or PRs.\n\nResult: 7 cases executed, 2 intentionally failing readiness assertions, 5 passing controls. Exit status 1. The failing assertions are actual missing capabilities, not dependency, decoding, or fixture errors. The fixture's separate scoped typecheck passes.\n\nRun from the worktree root:\n\n    bash apps/server/.t3/oracle/run.sh\n\nThe script runs from apps/server using this worktree's installed vp:\n\n    vp test run --config .t3/oracle/vite.config.ts .t3/oracle/fork-mcp.test.ts --reporter verbose\n\nExact output from the completed frozen-base run is in frozen-base.log; reruns update latest.log. The dependency installation command/output is in install.log (recorded verification reinstall; the initial required install also completed successfully). The fixture typecheck command is `vp run typecheck` from this directory; its output is typecheck.log.\n\nObserved results:\n\n| Case | Base result | Observation |\n| --- | --- | --- |\n| Adapter F0, same directory | FAIL | Native session.fork returns; parent identity tool still works; child effective catalog is [] instead of [oracle:child]. |\n| Adapter F1 | PASS | First child prompt includes exactly its own authenticated identity tool; parent and ordinary thread remain usable; cross-scope identity invocations are rejected. |\n| Adapter restart/resume | PASS | Closing the runtime scope and reopening/resuming restores child tools at the next prompt, rotates synthetic child auth, and leaves one child registration after repeated resume. Also covers moving the child to another directory. |\n| Registration unavailable | PASS | Synthetic HTTP 500 yields an empty child prompt catalog, changed model-facing instructions, and an MCP warning. The next prompt recovers after availability returns; parent stays intact. A fork that explicitly fails with an MCP error is also observable. |\n| Service F0, different directory | FAIL | Actual ProviderSessionManager issues distinct parent/child scoped credentials, then actual adapter native session.fork returns with no effective child identity tool. Parent remains intact. |\n| Service F1 | PASS | First child prompt uses the manager-issued child identity; ordinary control works; repeated resume still exposes one effective identity. |\n| Service restart | PASS | Actual manager close/open, resume, and first prompt restore child tools with fresh child credentials; old child auth is revoked; repeat resume has one effective identity and parent still works. |\n\nSkeptical interpretation:\n\nF0 means immediately after forkThread returns, before any child startTurn. Its assertion enforces the explicit readiness contract requested for this oracle. It is not evidence of the reported sticky first-prompt failure.\n\nF1 means the effective catalog at the fake HTTP server's receipt of the first child prompt. Both adapter and service F1 cases pass on base. The actual adapter registers MCP in prepareTurn before submitting that prompt. This offline fixture does NOT reproduce or prove persistent/sticky F1 loss, and cannot settle behavior inside a real OpenCode process. No sticky catalog cache is modeled or inferred.\n\nMechanism and isolation:\n\n- Actual v2 adapter and actual OpenCode2Client, with injected in-process HttpClient and OpenCode2Server connection, external:false.\n- Native session.fork executes through the actual adapter and HTTP client. No adapter or manager methods are mocked.\n- The fake models location-scoped MCP PUT upserts and DELETEs, per-session last-matching permission rules, native fork permission inheritance, and a synthetic authenticated identity tool. Catalogs are computed afresh from registrations, authorization, location, and rules. They are never made sticky and no ordering assertion is used as the capability proof.\n- The service cases use actual ProviderSessionManager, adapter registry, event sink, projections, and in-memory SQLite. MCP credential issuance/resolution/revocation is an injected synthetic registry; the unused runless event ingestor is a strict Layer.mock dependency.\n- Completion waits consume actual turn.terminal events from injected SSE frames. There are no sleeps, polling loops, retries, per-test timeouts, real providers, network operations/listeners, real credentials, settings reads, or production data.\n- TestProviderHost owns disposable temporary state. Only synthetic identity auth exists.\n- This entire directory is under the existing gitignored .t3 tree, excluded by the normal test/index discovery configuration, and has a local .ignore. It is loaded only with the explicit private test configuration. No graph/index tools or coding arms were used.\n",
+    "output": "COMMAND: vp test run --config .t3/oracle/vite.config.ts .t3/oracle/fork-mcp.test.ts --reporter verbose\nnote: You are running `vp test` as a Vite+ built-in command. If you meant to run the test npm script, use `vpr test` instead.\n\n RUN  v5.0.5 <WORKTREE_ORACLE>/apps/server\n\nstdout | .t3/oracle/fork-mcp.test.ts > F0: fork return exposes child identity capability and preserves parent\n[21:27:02.753] ERROR (#1): Error [AssertionError]: F0 missing child capability immediately after native fork returns: expected [] to deeply equal [ 'oracle:child' ]\n    at <WORKTREE_ORACLE>/apps/server/.t3/oracle/fork-mcp.test.ts:601:12 {\n  actual: [],\n  expected: [ 'oracle:child' ],\n  showDiff: true,\n  operator: 'deepStrictEqual',\n  [cause]: undefined\n}\n\n × .t3/oracle/fork-mcp.test.ts > F0: fork return exposes child identity capability and preserves parent 62ms\n   → F0 missing child capability immediately after native fork returns: expected [] to deeply equal [ 'oracle:child' ]\n ✓ .t3/oracle/fork-mcp.test.ts > F1: first child prompt sees its own identity with no parent bleed; ordinary thread works 28ms\n ✓ .t3/oracle/fork-mcp.test.ts > restart/resume keeps one effective child registration and rotates scoped identity credentials 38ms\n ✓ .t3/oracle/fork-mcp.test.ts > unavailable child registration is observable and recovers without parent bleed 19ms\nstdout | .t3/oracle/fork-mcp.test.ts > service F0: managed native fork returns a child with effective scoped MCP capability\n[21:27:02.939] ERROR (#374): Error [AssertionError]: service F0 missing child capability despite issued credentials: expected [] to deeply equal [ 'oracle:child' ]\n    at <WORKTREE_ORACLE>/apps/server/.t3/oracle/fork-mcp.test.ts:758:14 {\n  actual: [],\n  expected: [ 'oracle:child' ],\n  showDiff: true,\n  operator: 'deepStrictEqual',\n  [cause]: undefined\n}\n\n × .t3/oracle/fork-mcp.test.ts > service F0: managed native fork returns a child with effective scoped MCP capability 97ms\n   → service F0 missing child capability despite issued credentials: expected [] to deeply equal [ 'oracle:child' ]\n ✓ .t3/oracle/fork-mcp.test.ts > service F1: child first prompt uses manager-issued child credentials and ordinary thread remains usable 84ms\n ✓ .t3/oracle/fork-mcp.test.ts > service restart heals child prompt capability with fresh credentials and one effective registration 70ms\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  .t3/oracle/fork-mcp.test.ts > F0: fork return exposes child identity capability and preserves parent\nAssertionError: F0 missing child capability immediately after native fork returns: expected [] to deeply equal [ 'oracle:child' ]\n\n- Expected\n+ Received\n\n- [\n-   \"oracle:child\",\n- ]\n+ []\n\n ❯ .t3/oracle/fork-mcp.test.ts:601:12\n    599|     assert.equal(h.fake.forkCount, 1);\n    600|     h.expectIdentity(h.parent, parentId);\n    601|     assert.deepEqual(\n       |            ^\n    602|       h.fake.catalog(nativeIdOf(child)).map((tool) => tool.threadId),\n    603|       [childId],\n ❯ ~effect/Effect/successCont ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:1422:28\n ❯ ~effect/Effect/evaluate ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/core.ts:585:30\n ❯ FiberImpl.runLoop ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:654:41\n ❯ FiberImpl.evaluate ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:595:23\n ❯ FiberImpl.evaluate ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:589:27\n ❯ Array.<anonymous> ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:1159:17\n ❯ FiberImpl.evaluate ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:618:21\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n FAIL  .t3/oracle/fork-mcp.test.ts > service F0: managed native fork returns a child with effective scoped MCP capability\nAssertionError: service F0 missing child capability despite issued credentials: expected [] to deeply equal [ 'oracle:child' ]\n\n- Expected\n+ Received\n\n- [\n-   \"oracle:child\",\n- ]\n+ []\n\n ❯ .t3/oracle/fork-mcp.test.ts:758:14\n    756|       assert.notEqual(childSlot!.authorizationHeader, parentSlot!.auth…\n    757|       h.expectIdentity(h.parent, parentId);\n    758|       assert.deepEqual(\n       |              ^\n    759|         h.fake.catalog(nativeIdOf(child)).map((tool) => tool.threadId),\n    760|         [childId],\n ❯ ~effect/Effect/successCont ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:1422:28\n ❯ ~effect/Effect/evaluate ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/core.ts:585:30\n ❯ FiberImpl.runLoop ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:654:41\n ❯ FiberImpl.evaluate ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:595:23\n ❯ FiberImpl.evaluate ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:589:27\n ❯ Array.<anonymous> ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:1159:17\n ❯ FiberImpl.evaluate ../../node_modules/.pnpm/effect@4.0.5/node_modules/effect/src/internal/effect.ts:618:21\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯\n\n\n Test Files  1 failed (1)\n      Tests  2 failed | 5 passed (7)\n   Start at  21:27:01\n   Duration  1.77s (import 54%, tests 24%, transform 22%)\n\n",
+    "fixture_hashes": {
+      "apps/server/.t3/oracle/fork-mcp.test.ts": "fbd45cca1fcc8923295a46511863d48ab54cb007ff079e0d94b154ffb36365e9",
+      "apps/server/.t3/oracle/vite.config.ts": "11b95d7df99d68de3dc5865a9d6277e7e07e1c89ce67d92e99cd3a932d84bfd7",
+      "apps/server/.t3/oracle/tsconfig.json": "14fd6da40395fe4b8a944cae406cdb4f27d6003498f4ecb1795cb2a3efe1f402",
+      "apps/server/.t3/oracle/package.json": "b4d1b5c7b6a918167837a40f955eaa5e27a17df45c5cf16ce61489be4f7691ad"
+    },
+    "files": {
+      "apps/server/.t3/oracle/fork-mcp.test.ts": "// @effect-diagnostics preferSchemaOverJson:off -- The offline fake models raw JSON HTTP bodies.\n// @effect-diagnostics effectFnOpportunity:off -- Local test helpers do not need tracing spans.\nimport * as NodeServices from \"@effect/platform-node/NodeServices\";\nimport { assert, it } from \"@effect/vitest\";\nimport {\n  EnvironmentId,\n  MessageId,\n  NodeId,\n  ProviderInstanceId,\n  ProviderSessionId,\n  RunAttemptId,\n  RunId,\n  ThreadId,\n  type OrchestrationV2ProviderThread,\n  type OrchestrationV2AppThread,\n} from \"@t3tools/contracts\";\nimport * as Effect from \"effect/Effect\";\nimport * as Layer from \"effect/Layer\";\nimport * as Logger from \"effect/Logger\";\nimport * as References from \"effect/References\";\nimport * as Cause from \"effect/Cause\";\nimport * as Scope from \"effect/Scope\";\nimport * as Exit from \"effect/Exit\";\nimport * as DateTime from \"effect/DateTime\";\nimport * as McpSessionRegistry from \"../../src/mcp/McpSessionRegistry.ts\";\nimport * as ProviderSessionManager from \"../../src/orchestration-v2/ProviderSessionManager.ts\";\nimport * as ProviderAdapterRegistry from \"../../src/orchestration-v2/ProviderAdapterRegistry.ts\";\nimport * as EventSink from \"../../src/orchestration-v2/EventSink.ts\";\nimport * as EventStore from \"../../src/orchestration-v2/EventStore.ts\";\nimport * as ProjectionStore from \"../../src/orchestration-v2/ProjectionStore.ts\";\nimport * as Sqlite from \"../../src/persistence/Sqlite.ts\";\nimport * as CommandOutputHub from \"../../src/orchestration-v2/CommandOutputHub.ts\";\nimport * as ProviderEventIngestor from \"../../src/orchestration-v2/ProviderEventIngestor.ts\";\nimport * as Stream from \"effect/Stream\";\nimport * as Fiber from \"effect/Fiber\";\nimport * as Option from \"effect/Option\";\nimport * as HttpClient from \"effect/http/HttpClient\";\nimport * as HttpClientResponse from \"effect/http/HttpClientResponse\";\nimport * as OpenCode2Client from \"@t3tools/provider-opencode/server/v2/OpenCode2Client\";\nimport * as OpenCode2Server from \"@t3tools/provider-opencode/server/v2/OpenCode2Server\";\nimport * as Adapter from \"@t3tools/provider-opencode/server/v2/adapter\";\nimport * as IdAllocator from \"@t3tools/provider-core/server/IdAllocator\";\nimport * as McpProviderSessions from \"@t3tools/provider-core/server/McpProviderSessions\";\nimport * as TestProviderHost from \"@t3tools/provider-testing/TestProviderHost\";\nimport type * as ProviderAdapter from \"@t3tools/provider-core/server/ProviderAdapter\";\n\nconst WORK = \"/oracle/work\";\nconst OTHER_WORK = \"/oracle/child-work\";\nconst instanceId = ProviderInstanceId.make(\"opencode\");\nconst modelSelection = { instanceId, model: \"opencode/big-pickle\" };\nconst policy = (cwd = WORK) => ({\n  runtimeMode: \"full-access\" as const,\n  interactionMode: \"default\" as const,\n  cwd,\n});\nconst parentId = ThreadId.make(\"oracle:parent\");\nconst childId = ThreadId.make(\"oracle:child\");\nconst ordinaryId = ThreadId.make(\"oracle:ordinary\");\nconst nativeIdOf = (thread: OrchestrationV2ProviderThread) => {\n  const id = thread.nativeThreadRef?.nativeId;\n  if (typeof id !== \"string\") throw new Error(\"Fixture expected an actual native session\");\n  return id;\n};\ntype Rule = { action: string; resource: string; effect: string };\ntype Native = {\n  id: string;\n  title: string;\n  permissions: Rule[];\n  projectID: string;\n  model: { id: string; providerID: string; variant: string };\n  cost: number;\n  tokens: {\n    input: number;\n    output: number;\n    reasoning: number;\n    cache: { read: number; write: number };\n  };\n  time: { created: number; updated: number };\n  location: { directory: string };\n};\ntype Registration = {\n  directory: string;\n  server: string;\n  config: { url: string; headers: { Authorization: string } };\n};\ntype Identity = { name: string; threadId: string };\nconst glob = (pattern: string, value: string) => {\n  const parts = pattern.split(\"*\");\n  if (parts.length === 1) return pattern === value;\n  if (!value.startsWith(parts[0]!) || !value.endsWith(parts.at(-1)!)) return false;\n  let from = parts[0]!.length;\n  for (const part of parts.slice(1, -1)) {\n    const at = value.indexOf(part, from);\n    if (at < 0) return false;\n    from = at + part.length;\n  }\n  return true;\n};\n\nconst makeFake = () => {\n  const sessions = new Map<string, Native>();\n  const registrations = new Map<string, Registration>();\n  const identities = new Map<string, string>();\n  const unavailable = new Set<string>();\n  const instructions = new Map<string, string>();\n  const snapshots: Array<{ sessionID: string; tools: Identity[]; instructions: string }> = [];\n  const requests: string[] = [];\n  let nextId = 0;\n  let forkCount = 0;\n  let events: ReadableStreamDefaultController<Uint8Array> | undefined;\n  const native = (directory: string, permissions: Rule[], title = \"Oracle\"): Native => ({\n    id: `ses_oracle${++nextId}`,\n    title,\n    permissions,\n    projectID: \"global\",\n    model: { id: \"big-pickle\", providerID: \"opencode\", variant: \"default\" },\n    cost: 0,\n    tokens: { input: 0, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },\n    time: { created: 1790656601394, updated: 1790656601394 },\n    location: { directory },\n  });\n  const authorize = (registration: Registration) =>\n    identities.get(`${registration.config.url}\\n${registration.config.headers.Authorization}`);\n  const catalog = (sessionID: string): Identity[] => {\n    const session = sessions.get(sessionID)!;\n    const tools: Identity[] = [];\n    for (const registration of registrations.values()) {\n      const threadId = authorize(registration);\n      const name = `${registration.server}_identity`;\n      const rule = session.permissions.findLast(\n        (rule) => glob(rule.action, name) && glob(rule.resource, \"*\"),\n      );\n      if (\n        registration.directory === session.location.directory &&\n        threadId !== undefined &&\n        rule?.effect === \"allow\"\n      )\n        tools.push({ name, threadId });\n    }\n    return tools;\n  };\n  const invoke = (sessionID: string, name: string) => {\n    const tool = catalog(sessionID).find((tool) => tool.name === name);\n    if (!tool) throw new Error(\"identity tool unavailable\");\n    return { threadId: tool.threadId };\n  };\n  const client = HttpClient.make((request, url) =>\n    Effect.sync(() => {\n      const body =\n        request.body._tag === \"Uint8Array\"\n          ? (JSON.parse(new TextDecoder().decode(request.body.body)) as Record<string, unknown>)\n          : {};\n      const path = url.pathname;\n      requests.push(`${request.method} ${path}`);\n      const json = (value: unknown, status = 200) =>\n        HttpClientResponse.fromWeb(\n          request,\n          new Response(JSON.stringify(value), {\n            status,\n            headers: { \"content-type\": \"application/json\" },\n          }),\n        );\n      const empty = () => HttpClientResponse.fromWeb(request, new Response(null, { status: 204 }));\n      if (path === \"/api/event\")\n        return HttpClientResponse.fromWeb(\n          request,\n          new Response(\n            new ReadableStream<Uint8Array>({\n              start(controller) {\n                events = controller;\n              },\n            }),\n            { headers: { \"content-type\": \"text/event-stream\" } },\n          ),\n        );\n      if (path === \"/api/model\")\n        return json({\n          location: { directory: url.searchParams.get(\"location[directory]\") ?? WORK },\n          data: [\n            {\n              id: \"big-pickle\",\n              modelID: \"big-pickle\",\n              providerID: \"opencode\",\n              family: \"big-pickle\",\n              name: \"Big Pickle\",\n              compatibility: { reasoningField: \"reasoning_content\" },\n              package: \"@opencode/ai/providers/openai-compatible\",\n              settings: {},\n              capabilities: { tools: true, input: [\"text\"], output: [\"text\"] },\n              variants: [],\n              time: { released: 1760659200000 },\n              cost: [{ input: 0, output: 0, cache: { read: 0, write: 0 } }],\n              status: \"active\",\n              enabled: true,\n              limit: { context: 200000, input: 160000, output: 32000 },\n            },\n          ],\n        });\n      if (path === \"/api/agent\")\n        return json({\n          location: { directory: WORK },\n          data: [\n            {\n              id: \"build\",\n              name: \"Build\",\n              request: { settings: {}, headers: {}, body: {} },\n              description: \"Default\",\n              mode: \"primary\",\n              hidden: false,\n              permissions: [{ action: \"*\", resource: \"*\", effect: \"allow\" }],\n            },\n          ],\n        });\n      if (path === \"/api/session/active\") return json({ data: [] });\n      const segments = path.split(\"/\").filter(Boolean).map(decodeURIComponent);\n      if (segments[1] === \"experimental\" && segments[2] === \"mcp\") {\n        const server = segments[3]!;\n        const directory = url.searchParams.get(\"location[directory]\")!;\n        const key = `${directory}\\n${server}`;\n        if (request.method === \"DELETE\") {\n          registrations.delete(key);\n          return empty();\n        }\n        const config = body.config as Registration[\"config\"];\n        if (unavailable.has(config.headers.Authorization))\n          return json({ message: \"Synthetic MCP unavailable\" }, 500);\n        if (!identities.has(`${config.url}\\n${config.headers.Authorization}`))\n          return json({ message: \"Synthetic unauthorized\" }, 401);\n        registrations.set(key, { server, directory, config });\n        return empty();\n      }\n      if (\n        segments[1] === \"experimental\" &&\n        segments[2] === \"session\" &&\n        segments[4] === \"instructions\"\n      ) {\n        instructions.set(segments[3]!, String(body.value));\n        return empty();\n      }\n      if (path === \"/api/session\" && request.method === \"POST\") {\n        const session = native(\n          (body.location as { directory: string }).directory,\n          body.permissions as Rule[],\n          body.title as string,\n        );\n        sessions.set(session.id, session);\n        return json({ data: session });\n      }\n      if (segments[1] === \"session\") {\n        const id = segments[2]!;\n        const session = sessions.get(id);\n        if (!session) throw new Error(`Unknown synthetic session ${id}`);\n        const operation = segments[3];\n        if (!operation && request.method === \"GET\") return json({ data: session });\n        if (!operation && request.method === \"PATCH\") {\n          Object.assign(\n            session,\n            Object.fromEntries(Object.entries(body).filter(([, value]) => value !== null)),\n          );\n          return empty();\n        }\n        if (operation === \"fork\") {\n          forkCount++;\n          const fork = native(\n            session.location.directory,\n            structuredClone(session.permissions),\n            session.title,\n          );\n          sessions.set(fork.id, fork);\n          return json({ data: fork });\n        }\n        if (operation === \"move\") {\n          session.location.directory = String(body.directory);\n          return empty();\n        }\n        if (operation === \"model\") {\n          session.model = body.model as Native[\"model\"];\n          return empty();\n        }\n        if (operation === \"agent\" || operation === \"interrupt\") return empty();\n        if (operation === \"permission\" || operation === \"form\") return json({ data: [] });\n        if (operation === \"message\") return json({ data: [], cursor: {} });\n        if (operation === \"prompt\") {\n          snapshots.push({\n            sessionID: id,\n            tools: catalog(id),\n            instructions: instructions.get(id) ?? \"\",\n          });\n          return json({\n            data: {\n              id: body.id,\n              sessionID: id,\n              time: { created: 1790656601410 },\n              type: \"user\",\n              payload: { text: body.text },\n              delivery: \"steer\",\n            },\n          });\n        }\n      }\n      throw new Error(`Unhandled synthetic HTTP ${request.method} ${path} ${JSON.stringify(body)}`);\n    }),\n  );\n  return {\n    client,\n    registrations,\n    identities,\n    unavailable,\n    instructions,\n    snapshots,\n    sessions,\n    catalog,\n    invoke,\n    requests,\n    get forkCount() {\n      return forkCount;\n    },\n    complete(sessionID: string) {\n      events!.enqueue(\n        new TextEncoder().encode(\n          `data: ${JSON.stringify({ id: `evt_oracle${snapshots.length}`, created: 1, type: \"session.execution.succeeded\", data: { sessionID }, durable: { aggregateID: sessionID, seq: snapshots.length, version: 1 } })}\\n\\n`,\n        ),\n      );\n    },\n  };\n};\n\nconst hostLayer = TestProviderHost.layer({ cwd: WORK }).pipe(Layer.provide(NodeServices.layer));\nconst deps = Layer.mergeAll(\n  NodeServices.layer,\n  hostLayer,\n  IdAllocator.layer,\n  McpProviderSessions.layer,\n);\nconst setup = (managed = false) =>\n  Effect.gen(function* () {\n    const fake = makeFake();\n    const mcp = yield* McpProviderSessions.McpProviderSessions;\n    const credentialKeys = new Map<string, string>();\n    const config = (threadId: ThreadId, suffix = \"initial\") => ({\n      environmentId: EnvironmentId.make(\"oracle:environment\"),\n      threadId,\n      providerSessionId: `oracle-session:${threadId}:${suffix}`,\n      providerInstanceId: instanceId,\n      endpoint: \"http://oracle-mcp.invalid/mcp\",\n      authorizationHeader: `Bearer synthetic:${threadId}:${suffix}`,\n      browserToolsAvailable: false,\n    });\n    const issue = (threadId: ThreadId, suffix = \"initial\") =>\n      Effect.gen(function* () {\n        const slot = config(threadId, suffix);\n        for (const [key, owner] of fake.identities)\n          if (owner === threadId) fake.identities.delete(key);\n        const identityKey = `${slot.endpoint}\\n${slot.authorizationHeader}`;\n        fake.identities.set(identityKey, threadId);\n        credentialKeys.set(slot.providerSessionId, identityKey);\n        yield* mcp.set(slot);\n        return slot;\n      });\n    if (!managed) for (const id of [parentId, childId, ordinaryId]) yield* issue(id);\n    const api = yield* OpenCode2Client.make.pipe(\n      Effect.provideService(HttpClient.HttpClient, fake.client),\n    );\n    const connection = {\n      ...(yield* api.connect({ baseUrl: \"http://oracle-opencode.invalid\", password: \"synthetic\" })),\n      url: \"http://oracle-opencode.invalid\",\n      version: \"2.0.18\",\n      external: false,\n    };\n    const adapter = yield* Adapter.make(instanceId).pipe(\n      Effect.provideService(OpenCode2Server.OpenCode2Server, {\n        withConnection: (use) => use(connection),\n      }),\n    );\n    const providerSessionId = ProviderSessionId.make(\"oracle:runtime\");\n    const openInput = {\n      threadId: parentId,\n      providerSessionId,\n      modelSelection,\n      runtimePolicy: policy(managed ? process.cwd() : WORK),\n    };\n    let manager: ProviderSessionManager.ProviderSessionManagerV2[\"Service\"] | undefined;\n    if (managed) {\n      const stores = Layer.merge(EventStore.layer, ProjectionStore.layer).pipe(\n        Layer.provide(Sqlite.layerMemory),\n      );\n      const sink = EventSink.layer.pipe(Layer.provide(Layer.merge(stores, Sqlite.layerMemory)));\n      let sequence = 0;\n      const revoke = (threadId: ThreadId) =>\n        Effect.sync(() => {\n          for (const [key, owner] of fake.identities)\n            if (owner === threadId) fake.identities.delete(key);\n        });\n      const registry = Layer.succeed(McpSessionRegistry.McpSessionRegistry, {\n        issue: (request) =>\n          Effect.gen(function* () {\n            const slot = yield* issue(request.threadId, `managed${++sequence}`);\n            return {\n              config: {\n                ...slot,\n                ...(request.capabilities === undefined\n                  ? {}\n                  : { capabilities: request.capabilities }),\n                browserToolsAvailable: request.browserToolsAvailable ?? true,\n              },\n            };\n          }),\n        resolve: (raw) =>\n          Effect.sync(() => {\n            const owner = fake.identities.get(`http://oracle-mcp.invalid/mcp\\nBearer ${raw}`);\n            return owner === undefined\n              ? undefined\n              : {\n                  environmentId: EnvironmentId.make(\"oracle:environment\"),\n                  requestNamespace: `synthetic:${owner}`,\n                  thread: {\n                    threadId: ThreadId.make(owner),\n                    providerSessionId: `oracle-session:${owner}`,\n                    providerInstanceId: instanceId,\n                    subagent: false,\n                  },\n                  client: undefined,\n                  capabilities: new Set([\n                    \"orchestration\",\n                    \"worktree\",\n                    \"pull-requests\",\n                    \"preview\",\n                  ] as const),\n                  issuedAt: 0,\n                };\n          }),\n        touch: () => Effect.void,\n        revokeThread: revoke,\n        revokeProviderSession: (credential) =>\n          Effect.sync(() => {\n            const key = credentialKeys.get(credential);\n            if (key !== undefined) fake.identities.delete(key);\n            credentialKeys.delete(credential);\n          }),\n        revokeAll: Effect.sync(() => fake.identities.clear()),\n      });\n      const managerLayer = ProviderSessionManager.layerWithOptions({ idleTimeoutMs: 3600000 }).pipe(\n        Layer.provide(\n          Layer.mergeAll(\n            ProviderAdapterRegistry.layerSingle(adapter),\n            registry,\n            stores,\n            sink,\n            CommandOutputHub.layer.pipe(Layer.provide(Layer.merge(sink, stores))),\n            Layer.mock(ProviderEventIngestor.ProviderEventIngestorV2)({}),\n          ),\n        ),\n      );\n      const context = yield* Layer.build(Layer.mergeAll(managerLayer, sink, stores));\n      manager = yield* Effect.service(ProviderSessionManager.ProviderSessionManagerV2).pipe(\n        Effect.provide(context),\n      );\n      const eventSink = yield* Effect.service(EventSink.EventSinkV2).pipe(Effect.provide(context));\n      const allocator = yield* IdAllocator.IdAllocatorV2;\n      const now = yield* DateTime.now;\n      const projectId = yield* allocator.allocate.project({ fixtureName: \"oracle\" });\n      for (const id of [parentId, childId, ordinaryId]) {\n        yield* eventSink.write({\n          events: [\n            {\n              id: yield* allocator.allocate.event({ threadId: id }),\n              type: \"thread.created\",\n              threadId: id,\n              occurredAt: now,\n              payload: {\n                id,\n                projectId,\n                title: \"Oracle\",\n                createdBy: \"user\",\n                creationSource: \"web\",\n                providerInstanceId: instanceId,\n                modelSelection,\n                runtimeMode: \"full-access\",\n                interactionMode: \"default\",\n                branch: null,\n                worktreePath: null,\n                activeProviderThreadId: null,\n                lineage: { parentThreadId: null, relationshipToParent: null, rootThreadId: id },\n                forkedFrom: null,\n                createdAt: now,\n                updatedAt: now,\n                archivedAt: null,\n                settledOverride: null,\n                settledAt: null,\n                lastVisitedAt: null,\n                deletedAt: null,\n              },\n            },\n          ],\n        });\n      }\n    }\n    let currentScope: Scope.Closeable | undefined;\n    const stop = () =>\n      manager\n        ? manager.close(providerSessionId)\n        : currentScope\n          ? Scope.close(currentScope, Exit.void)\n          : Effect.void;\n    const open = () =>\n      Effect.gen(function* () {\n        if (manager) return yield* manager.open(openInput);\n        const scope = yield* Scope.make();\n        currentScope = scope;\n        yield* Effect.addFinalizer(() => Scope.close(scope, Exit.void));\n        return yield* adapter\n          .openSession(openInput)\n          .pipe(Effect.provideService(Scope.Scope, currentScope));\n      });\n    const restart = () => stop().pipe(Effect.andThen(open()));\n    const runtime = yield* open();\n    const ensure = (id: ThreadId, cwd = WORK) =>\n      runtime.ensureThread({\n        threadId: id,\n        modelSelection,\n        runtimePolicy: policy(cwd),\n        title: \"Oracle\",\n      });\n    const parent = yield* ensure(parentId);\n    let turnCount = 0;\n    const prompt = (\n      current: ProviderAdapter.ProviderAdapterV2SessionRuntime,\n      thread: OrchestrationV2ProviderThread,\n      cwd = WORK,\n    ) =>\n      Effect.gen(function* () {\n        const n = ++turnCount;\n        const terminal = yield* current.events.pipe(\n          Stream.filter((event) => event.type === \"turn.terminal\"),\n          Stream.runHead,\n          Effect.forkScoped,\n        );\n        yield* current.startTurn({\n          appThread: { title: \"Oracle\" } as OrchestrationV2AppThread,\n          threadId: thread.appThreadId!,\n          runId: RunId.make(`oracle:run${n}`),\n          runOrdinal: n,\n          providerTurnOrdinal: n,\n          attemptId: RunAttemptId.make(`oracle:attempt${n}`),\n          rootNodeId: NodeId.make(`oracle:node${n}`),\n          providerThread: thread,\n          message: {\n            messageId: MessageId.make(`oracle:message${n}`),\n            text: \"Inspect available tools\",\n            attachments: [],\n            createdBy: \"user\",\n            creationSource: \"web\",\n            scheduledTaskId: undefined,\n            senderThreadId: undefined,\n          },\n          modelSelection,\n          runtimePolicy: policy(cwd),\n        });\n        fake.complete(nativeIdOf(thread));\n        const ended = yield* Fiber.join(terminal);\n        assert.equal(Option.getOrUndefined(ended)?.type, \"turn.terminal\");\n        return fake.snapshots.at(-1)!;\n      });\n    yield* prompt(runtime, parent);\n    const fork = (cwd = WORK) =>\n      runtime.forkThread({\n        sourceProviderThread: parent,\n        targetThreadId: childId,\n        runtimePolicy: policy(cwd),\n      });\n    const expectIdentity = (thread: OrchestrationV2ProviderThread, expected: ThreadId) => {\n      const nativeId = nativeIdOf(thread);\n      const tools = fake.catalog(nativeId);\n      assert.deepEqual(\n        tools.map((tool) => tool.threadId),\n        [expected],\n      );\n      assert.deepEqual(fake.invoke(nativeId, tools[0]!.name), { threadId: expected });\n    };\n    return {\n      fake,\n      runtime,\n      parent,\n      fork,\n      prompt,\n      expectIdentity,\n      ensure,\n      open,\n      restart,\n      issue,\n      manager,\n    };\n  });\n\nit.effect(\"F0: fork return exposes child identity capability and preserves parent\", () =>\n  Effect.gen(function* () {\n    const h = yield* setup();\n    const child = yield* h.fork();\n    assert.equal(h.fake.forkCount, 1);\n    h.expectIdentity(h.parent, parentId);\n    assert.deepEqual(\n      h.fake.catalog(nativeIdOf(child)).map((tool) => tool.threadId),\n      [childId],\n      \"F0 missing child capability immediately after native fork returns\",\n    );\n    h.expectIdentity(child, childId);\n  }).pipe(Effect.scoped, Effect.provide(deps)),\n);\n\nit.effect(\n  \"F1: first child prompt sees its own identity with no parent bleed; ordinary thread works\",\n  () =>\n    Effect.gen(function* () {\n      const h = yield* setup();\n      const child = yield* h.fork();\n      const first = yield* h.prompt(h.runtime, child);\n      assert.deepEqual(\n        first.tools.map((tool) => tool.threadId),\n        [childId],\n        \"F1 effective prompt catalog\",\n      );\n      h.expectIdentity(child, childId);\n      h.expectIdentity(h.parent, parentId);\n      const parentTool = h.fake.catalog(nativeIdOf(h.parent))[0]!;\n      const childTool = h.fake.catalog(nativeIdOf(child))[0]!;\n      assert.throws(\n        () => h.fake.invoke(nativeIdOf(child), parentTool.name),\n        \"identity tool unavailable\",\n      );\n      assert.throws(\n        () => h.fake.invoke(nativeIdOf(h.parent), childTool.name),\n        \"identity tool unavailable\",\n      );\n      const ordinary = yield* h.ensure(ordinaryId);\n      const control = yield* h.prompt(h.runtime, ordinary);\n      assert.deepEqual(\n        control.tools.map((tool) => tool.threadId),\n        [ordinaryId],\n      );\n      h.expectIdentity(ordinary, ordinaryId);\n      const parent = yield* h.prompt(h.runtime, h.parent);\n      assert.deepEqual(\n        parent.tools.map((tool) => tool.threadId),\n        [parentId],\n      );\n      assert.equal(h.fake.forkCount, 1);\n    }).pipe(Effect.scoped, Effect.provide(deps)),\n);\n\nit.effect(\n  \"restart/resume keeps one effective child registration and rotates scoped identity credentials\",\n  () =>\n    Effect.gen(function* () {\n      const h = yield* setup();\n      const child = yield* h.fork(OTHER_WORK);\n      const restarted = yield* h.restart();\n      yield* restarted.resumeThread({\n        providerThread: h.parent,\n        threadId: parentId,\n        modelSelection,\n        runtimePolicy: policy(),\n      });\n      yield* h.prompt(restarted, h.parent);\n      yield* restarted.resumeThread({\n        providerThread: child,\n        threadId: childId,\n        modelSelection,\n        runtimePolicy: policy(OTHER_WORK),\n      });\n      yield* h.issue(childId, \"rotated\");\n      yield* h.prompt(restarted, child, OTHER_WORK);\n      yield* restarted.resumeThread({\n        providerThread: child,\n        threadId: childId,\n        modelSelection,\n        runtimePolicy: policy(OTHER_WORK),\n      });\n      yield* h.prompt(restarted, child, OTHER_WORK);\n      h.expectIdentity(child, childId);\n      h.expectIdentity(h.parent, parentId);\n      assert.equal(\n        [...h.fake.registrations.values()].filter(\n          (registration) =>\n            h.fake.identities.get(\n              `${registration.config.url}\\n${registration.config.headers.Authorization}`,\n            ) === childId,\n        ).length,\n        1,\n      );\n      assert.isTrue(\n        [...h.fake.registrations.values()].some(\n          (registration) =>\n            registration.config.headers.Authorization === `Bearer synthetic:${childId}:rotated`,\n        ),\n      );\n    }).pipe(Effect.scoped, Effect.provide(deps)),\n);\n\nit.effect(\"unavailable child registration is observable and recovers without parent bleed\", () => {\n  const logs: Array<{ level: string; message: unknown }> = [];\n  return Effect.gen(function* () {\n    const h = yield* setup();\n    h.fake.unavailable.add(`Bearer synthetic:${childId}:initial`);\n    const result = yield* h.fork().pipe(Effect.exit);\n    h.expectIdentity(h.parent, parentId);\n    if (Exit.isFailure(result)) {\n      assert.include(Cause.pretty(result.cause), \"MCP\");\n      return;\n    }\n    const child = result.value;\n    const failed = yield* h.prompt(h.runtime, child);\n    assert.deepEqual(failed.tools, []);\n    assert.notEqual(\n      failed.instructions,\n      h.fake.snapshots[0]!.instructions,\n      \"availability must affect model-visible instructions\",\n    );\n    assert.isTrue(\n      logs.some((log) => log.level === \"Warn\" && JSON.stringify(log.message).includes(\"MCP\")),\n      \"MCP registration failure must be observable\",\n    );\n    h.expectIdentity(h.parent, parentId);\n    h.fake.unavailable.clear();\n    const recovered = yield* h.prompt(h.runtime, child);\n    assert.deepEqual(\n      recovered.tools.map((tool) => tool.threadId),\n      [childId],\n    );\n    h.expectIdentity(child, childId);\n  }).pipe(\n    Effect.scoped,\n    Effect.provide(\n      Layer.mergeAll(\n        deps,\n        Logger.layer(\n          [Logger.make(({ logLevel, message }) => logs.push({ level: logLevel, message }))],\n          { mergeWithExisting: false },\n        ),\n        Layer.succeed(References.MinimumLogLevel, \"Warn\"),\n      ),\n    ),\n  );\n});\n\nit.effect(\n  \"service F0: managed native fork returns a child with effective scoped MCP capability\",\n  () =>\n    Effect.gen(function* () {\n      const h = yield* setup(true);\n      const child = yield* h.fork(OTHER_WORK);\n      assert.equal(h.fake.forkCount, 1);\n      const slots = yield* McpProviderSessions.McpProviderSessions;\n      const childSlot = yield* slots.read(childId);\n      const parentSlot = yield* slots.read(parentId);\n      assert.isDefined(childSlot, \"manager issued child credentials\");\n      assert.notEqual(childSlot!.authorizationHeader, parentSlot!.authorizationHeader);\n      h.expectIdentity(h.parent, parentId);\n      assert.deepEqual(\n        h.fake.catalog(nativeIdOf(child)).map((tool) => tool.threadId),\n        [childId],\n        \"service F0 missing child capability despite issued credentials\",\n      );\n    }).pipe(Effect.scoped, Effect.provide(deps)),\n);\n\nit.effect(\n  \"service F1: child first prompt uses manager-issued child credentials and ordinary thread remains usable\",\n  () =>\n    Effect.gen(function* () {\n      const h = yield* setup(true);\n      const child = yield* h.fork();\n      const first = yield* h.prompt(h.runtime, child);\n      assert.deepEqual(\n        first.tools.map((tool) => tool.threadId),\n        [childId],\n      );\n      h.expectIdentity(child, childId);\n      h.expectIdentity(h.parent, parentId);\n      const parentTool = h.fake.catalog(nativeIdOf(h.parent))[0]!;\n      const childTool = h.fake.catalog(nativeIdOf(child))[0]!;\n      assert.throws(\n        () => h.fake.invoke(nativeIdOf(child), parentTool.name),\n        \"identity tool unavailable\",\n      );\n      assert.throws(\n        () => h.fake.invoke(nativeIdOf(h.parent), childTool.name),\n        \"identity tool unavailable\",\n      );\n      const ordinary = yield* h.ensure(ordinaryId);\n      const control = yield* h.prompt(h.runtime, ordinary);\n      assert.deepEqual(\n        control.tools.map((tool) => tool.threadId),\n        [ordinaryId],\n      );\n      yield* h.runtime.resumeThread({\n        providerThread: child,\n        threadId: childId,\n        modelSelection,\n        runtimePolicy: policy(),\n      });\n      yield* h.prompt(h.runtime, child);\n      h.expectIdentity(child, childId);\n      assert.equal(h.fake.catalog(nativeIdOf(child)).length, 1);\n    }).pipe(Effect.scoped, Effect.provide(deps)),\n);\n\nit.effect(\n  \"service restart heals child prompt capability with fresh credentials and one effective registration\",\n  () =>\n    Effect.gen(function* () {\n      const h = yield* setup(true);\n      const child = yield* h.fork();\n      const slots = yield* McpProviderSessions.McpProviderSessions;\n      const oldSlot = yield* slots.read(childId);\n      assert.isDefined(oldSlot);\n      const restarted = yield* h.restart();\n      yield* restarted.resumeThread({\n        providerThread: h.parent,\n        threadId: parentId,\n        modelSelection,\n        runtimePolicy: policy(),\n      });\n      yield* h.prompt(restarted, h.parent);\n      yield* restarted.resumeThread({\n        providerThread: child,\n        threadId: childId,\n        modelSelection,\n        runtimePolicy: policy(),\n      });\n      const healed = yield* h.prompt(restarted, child);\n      assert.deepEqual(\n        healed.tools.map((tool) => tool.threadId),\n        [childId],\n      );\n      const renewedSlot = yield* slots.read(childId);\n      assert.isDefined(renewedSlot);\n      assert.notEqual(renewedSlot!.authorizationHeader, oldSlot!.authorizationHeader);\n      assert.isFalse(\n        h.fake.identities.has(`${oldSlot!.endpoint}\\n${oldSlot!.authorizationHeader}`),\n      );\n      yield* restarted.resumeThread({\n        providerThread: child,\n        threadId: childId,\n        modelSelection,\n        runtimePolicy: policy(),\n      });\n      yield* h.prompt(restarted, child);\n      h.expectIdentity(child, childId);\n      h.expectIdentity(h.parent, parentId);\n      assert.equal(h.fake.catalog(nativeIdOf(child)).length, 1);\n    }).pipe(Effect.scoped, Effect.provide(deps)),\n);\n",
+      "apps/server/.t3/oracle/vite.config.ts": "import { defineConfig } from \"vite-plus\";\nexport default defineConfig({\n  test: {\n    environment: \"node\",\n    include: [\".t3/oracle/*.test.ts\"],\n    exclude: [\"**/node_modules/**\"],\n    fileParallelism: false,\n    testTimeout: 20000,\n    retry: 0,\n  },\n});\n",
+      "apps/server/.t3/oracle/tsconfig.json": "{\"extends\":\"../../tsconfig.json\",\"include\":[\"fork-mcp.test.ts\"],\"exclude\":[]}\n",
+      "apps/server/.t3/oracle/package.json": "{\"name\":\"hidden-offline-oracle\",\"private\":true,\"type\":\"module\",\"scripts\":{\"typecheck\":\"tsc --noEmit -p tsconfig.json\"}}\n"
+    },
+    "typecheck_output": "$ tsc --noEmit -p tsconfig.json ⊘ cache disabled\n\n",
+    "tests": {
+      "failed": 2,
+      "passed": 5,
+      "total": 7
+    },
+    "F0": "FAIL: adapter and service child catalog missing",
+    "F1": "PASS: adapter and service own scoped tools at first prompt",
+    "sticky_symptom": "NOT_REPRODUCED"
+  },
+  "coding": {
+    "source": {
+      "state": "NOT_RUN",
+      "head": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+      "patch_sha": null,
+      "coding_runtime_s": null,
+      "tokens": null,
+      "currency": null,
+      "score": null
+    },
+    "afterimage": {
+      "state": "NOT_RUN",
+      "head": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+      "patch_sha": null,
+      "coding_runtime_s": null,
+      "tokens": null,
+      "currency": null,
+      "score": null
+    },
+    "gitnexus": {
+      "state": "NOT_RUN",
+      "head": "abf1b8f2e14d2edeeb1e4393984657906dfff7ed",
+      "patch_sha": null,
+      "coding_runtime_s": null,
+      "tokens": null,
+      "currency": null,
+      "score": null
+    }
+  },
+  "blinded_review": "NOT_RUN: no candidate patches",
+  "original_prompt": "Fix this user-visible behavior in this TypeScript fork: after a user forks an OpenCode thread mid-conversation, the child cannot discover or invoke its T3 capabilities. The original thread keeps working. Restarting the provider does not restore the child capabilities. The child should have its own tools from its first catalog snapshot, with parent and child permissions and credentials isolated. Ordinary sessions should continue to work; resume/restart should recover without duplicate registrations, and unavailable registration must surface an error. Use synthetic offline tests only, no real provider, network, ports, credentials or global settings. Independently locate the cause from source. Write a meaningful failing test first, then implement the narrow fix. Run targeted tests, format/lint/package typecheck where feasible, git diff --check, and review your entire diff. Commit locally only. No push, PR, merge, deployment, or subagents. Do not inspect peer worktrees, prior reports, historical patches, hidden oracle, benchmark scoring or coordinator files. Do not use memory, internet, or other graph tools. Stay inside your assigned absolute worktree for every file read/edit and shell command. Runtime budget 1080 seconds. Record diagnosis and validated-fix milestones in your response, with exact test results and unrun gates. Do not claim elapsed timing unless measured. Follow repository AGENTS. Source files are frozen initially at abf1b8f2e14d2edeeb1e4393984657906dfff7ed.",
+  "watch_registered": false,
+  "merge": "PROHIBITED",
+  "deployment": "NOT_RUN",
+  "limitations": [
+    "One CLI expert reviewed four roles; not four independent reviewers",
+    "Native T3 top-level coding sessions not used",
+    "No coding runtimes, token or monetary comparison available",
+    "Fakes recompute catalogs; provider sticky cache behavior not established",
+    "Index products use differing default exclusions and schemas",
+    "No hard RSS cap; measured peaks below 12 GiB, 720-second timeout enforced",
+    "First gate lacked ORDER BY and allowed watcher; corrected once before coding",
+    "No write-syscall proof; stability measured by full index-file hashes and mtimes",
+    "Afterimage CLI has a background update-check path; auxiliary HOME/device-id file observed; no claim of globally write-free query process",
+    "No real OpenCode, credentials, sockets, listeners, production state or global settings used in oracle"
+  ],
+  "coordinator_verification": {
+    "oracle_rerun": {
+      "exit": 1,
+      "tests_failed": 2,
+      "tests_passed": 5,
+      "duration_s": 1.76
+    },
+    "fixture_typecheck": {
+      "exit": 0
+    },
+    "report_check_changed": {
+      "exit": 0,
+      "format": "PASS",
+      "lint_typecheck_tests_build": "not selected by docs-only changed-file checks",
+      "knip": "SKIPPED: no code or manifest change"
+    },
+    "diff_check": "PASS",
+    "self_review": "Full report and structured evidence reviewed; fixture hashes and all gate/candidate identities checked; report-only, no runtime change."
+  }
+}
